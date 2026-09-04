@@ -7,6 +7,10 @@ const easeInOutCubic = (t: number): number =>
 
 const easeOutExpo = (t: number): number => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
+/** Slow lead-in, long glide out. The arrival reads as settling, not stopping. */
+const easeInOutQuint = (t: number): number =>
+  t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
+
 /**
  * Drives the camera. Three behaviours share one rig:
  *
@@ -40,14 +44,19 @@ export class CameraRig {
 
   private baseDistance = 46;
   private baseHeight = 15;
+  /** The unanimated field of view; focus flights bend `camera.fov` around it. */
+  private readonly baseFov = 52;
   private readonly reducedMotion: boolean;
 
   /** Set while focused so the rig can track a planet that is still orbiting. */
   private focusGetter: (() => THREE.Vector3) | null = null;
   private focusDistance = 6;
+  /** Fired once when a focus flight actually lands. Cleared if superseded. */
+  private onArrive: (() => void) | null = null;
 
   constructor(aspect: number, reducedMotion: boolean, width = 1, height = 1) {
     this.camera = new THREE.PerspectiveCamera(52, aspect, 0.1, 2000);
+    this.camera.fov = this.baseFov;
     this.reducedMotion = reducedMotion;
     this.updateFraming(aspect, width, height);
 
@@ -56,7 +65,13 @@ export class CameraRig {
       this.state = 'idle';
       this.idlePosition(this.orbitAngle, this.camera.position);
     } else {
-      this.camera.position.set(0, this.baseHeight * 4.5, this.baseDistance * 2.6);
+      // Far out, high above the ecliptic, and swung well off the resting angle
+      // so the approach arcs around the system rather than sliding straight in.
+      this.camera.position.set(
+        Math.sin(this.orbitAngle - 1.5) * this.baseDistance * 2.9,
+        this.baseHeight * 6.5,
+        Math.cos(this.orbitAngle - 1.5) * this.baseDistance * 2.9
+      );
     }
     this.camera.lookAt(this.lookAt);
   }
@@ -72,7 +87,7 @@ export class CameraRig {
    */
   updateFraming(aspect: number, width = 1, height = 1): void {
     const systemRadius = 30;
-    const vFov = THREE.MathUtils.degToRad(this.camera.fov);
+    const vFov = THREE.MathUtils.degToRad(this.baseFov);
     const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect);
     const fitDistance = systemRadius / Math.tan(Math.min(vFov, hFov) / 2);
 
@@ -108,13 +123,14 @@ export class CameraRig {
     this.lookTo.copy(this.origin);
   }
 
-  focusOn(getPosition: () => THREE.Vector3, planetRadius: number): void {
+  focusOn(getPosition: () => THREE.Vector3, planetRadius: number, onArrive?: () => void): void {
     this.focusGetter = getPosition;
     this.focusDistance = Math.max(planetRadius * 4.5, 6.5);
+    this.onArrive = onArrive ?? null;
 
     this.state = 'focusing';
     this.tweenElapsed = 0;
-    this.tweenDuration = this.reducedMotion ? 0.001 : 1.5;
+    this.tweenDuration = this.reducedMotion ? 0.001 : 1.9;
     this.tweenFrom.copy(this.camera.position);
     this.lookFrom.copy(this.lookAt);
 
@@ -134,6 +150,8 @@ export class CameraRig {
     this.idlePosition(this.orbitAngle, this.tweenTo);
     this.lookTo.copy(this.origin);
     this.focusGetter = null;
+    // Pulling out cancels any panel that was waiting on the flight.
+    this.onArrive = null;
   }
 
   get isFocused(): boolean {
@@ -188,9 +206,17 @@ export class CameraRig {
       case 'intro': {
         this.tweenElapsed += delta;
         const t = Math.min(this.tweenElapsed / this.tweenDuration, 1);
-        const eased = easeOutExpo(t);
+        const eased = easeInOutQuint(t);
+
+        // The resting angle keeps advancing through the intro, so the camera
+        // arcs around the system on its way down instead of dropping straight
+        // toward a fixed mark.
+        this.orbitAngle += delta * 0.16;
+        this.idlePosition(this.orbitAngle, this.tweenTo);
+
         this.camera.position.lerpVectors(this.tweenFrom, this.tweenTo, eased);
         this.lookAt.lerpVectors(this.lookFrom, this.lookTo, eased);
+
         if (t >= 1) this.state = 'idle';
         break;
       }
@@ -216,9 +242,26 @@ export class CameraRig {
         this.camera.position.lerpVectors(this.tweenFrom, this.tweenTo, eased);
         this.lookAt.lerpVectors(this.lookFrom, this.lookTo, eased);
 
+        // Bow the path so the camera swings over the system rather than
+        // sliding through it in a straight line. Zero at both ends.
+        const bow = Math.sin(eased * Math.PI);
+        this.camera.position.y += bow * this.baseDistance * 0.22;
+
+        // Squeeze the field of view through the middle of the move and release
+        // it on arrival. Reads as a lens settling onto a subject.
+        const targetFov = this.baseFov - 7 * bow;
+        if (Math.abs(this.camera.fov - targetFov) > 0.01) {
+          this.camera.fov = targetFov;
+          this.camera.updateProjectionMatrix();
+        }
+
         if (t >= 1) {
           if (this.state === 'focusing') {
             this.state = 'focused';
+            // Hand off exactly once; the callback may start a new flight.
+            const arrived = this.onArrive;
+            this.onArrive = null;
+            arrived?.();
           } else {
             this.state = 'idle';
             // Resume the drift from wherever the return actually landed.

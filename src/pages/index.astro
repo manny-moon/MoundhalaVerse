@@ -11,6 +11,17 @@ import Contact from '@components/panels/Contact.astro';
 import { profile, asset } from '@lib/site';
 
 const description = `${profile.name} — ${profile.title}. ${profile.blurb}`;
+
+// Split the name per character so each glyph can resolve on its own beat.
+// Grouped by word so the heading still wraps normally on narrow viewports, and
+// the running index keeps the stagger even across the space.
+let charIndex = 0;
+const nameWords = profile.name.split(' ').map((word) => {
+  const chars = [...word].map((char) => ({ char, index: charIndex++ }));
+  charIndex += 1; // account for the space so timing stays uniform
+  return chars;
+});
+const nameLength = charIndex;
 ---
 
 <BaseLayout title="The Moundhalaverse · Emmanuel Moundhala" description={description}>
@@ -29,7 +40,20 @@ const description = `${profile.name} — ${profile.title}. ${profile.blurb}`;
         {profile.title} · Messiah University ’27
       </p>
 
-      <h1 class="intro__name">{profile.name}</h1>
+      <h1 class="intro__name" aria-label={profile.name} style={`--n: ${nameLength}`}>
+        {
+          nameWords.map((word, w) => (
+            <>
+              {w > 0 && ' '}
+              <span class="intro__word" aria-hidden="true">
+                {word.map(({ char, index }) => (
+                  <span class="intro__char" style={`--i: ${index}`}>{char}</span>
+                ))}
+              </span>
+            </>
+          ))
+        }
+      </h1>
 
       <p class="intro__headline">
         <span id="headline" class="headline" aria-live="off">The Moundhalaverse</span>
@@ -99,10 +123,14 @@ const description = `${profile.name} — ${profile.title}. ${profile.blurb}`;
     opacity: 1;
   }
 
-  /* Shown when WebGL is unavailable or the scene chunk fails to load. */
+  /* Shown when WebGL is unavailable or the scene chunk fails to load.
+     Must not take pointer events: it covers the canvas at inset 0 and paints
+     after it, so without this it silently swallows every hover and click meant
+     for the planets. */
   .stage__fallback {
     position: absolute;
     inset: 0;
+    pointer-events: none;
     opacity: 0;
     transition: opacity var(--dur-slow) var(--ease);
     background:
@@ -181,13 +209,81 @@ const description = `${profile.name} — ${profile.title}. ${profile.blurb}`;
     max-width: 34rem;
     display: grid;
     gap: var(--sp-4);
-    animation: rise 900ms var(--ease-out) both;
   }
 
+  /* Entrance choreography.
+     Each element holds its `from` state via `backwards` fill, so nothing
+     flashes before its beat. Timings run against the camera's 2.1s intro
+     dolly so the copy and the scene resolve together. */
+  .intro__eyebrow,
+  .intro__headline,
+  .intro__blurb,
+  .intro__actions > * {
+    opacity: 0;
+  }
+
+  /* Nothing starts until the scene has compiled its shaders and reported
+     ready. Running this against a thread that is busy building WebGL pipelines
+     is what made the entrance stutter. */
+  body[data-stage='ready'] :is(
+    .intro__eyebrow,
+    .intro__headline,
+    .intro__blurb,
+    .intro__actions > *
+  ) {
+    animation: rise 1000ms var(--ease-out) forwards;
+  }
+
+  body[data-stage='ready'] .intro__eyebrow  { animation-delay: 120ms; }
+  body[data-stage='ready'] .intro__headline { animation-delay: 1450ms; }
+  body[data-stage='ready'] .intro__blurb    { animation-delay: 1700ms; }
+
+  body[data-stage='ready'] .intro__actions > *:nth-child(1) { animation-delay: 1950ms; }
+  body[data-stage='ready'] .intro__actions > *:nth-child(2) { animation-delay: 2080ms; }
+  body[data-stage='ready'] .intro__actions > *:nth-child(3) { animation-delay: 2210ms; }
+
+  /* Transform and opacity only - no filter. Animating blur forces a full
+     repaint every frame, which is what made this choppy alongside the scene. */
   @keyframes rise {
     from {
       opacity: 0;
-      translate: 0 14px;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* The name resolves glyph by glyph. The gradient stays on the <h1> so the
+     fill sweeps across the whole name rather than repeating per letter. */
+  .intro__word {
+    display: inline-block;
+  }
+
+  .intro__char {
+    display: inline-block;
+    /* Position along the name, 0 to 1. */
+    --t: calc(var(--i) / var(--n));
+    color: color-mix(in oklab, #fff5e2, #9fc8ff calc(var(--t) * 88%));
+    opacity: 0;
+    /* Only opacity and transform animate, both compositor-friendly. */
+    will-change: transform, opacity;
+  }
+
+  body[data-stage='ready'] .intro__char {
+    animation: charIn 900ms var(--ease-out) forwards;
+    animation-delay: calc(var(--i) * 52ms);
+  }
+
+  @keyframes charIn {
+    from {
+      opacity: 0;
+      transform: translateY(0.5em) rotate(9deg) scale(0.88);
+    }
+    to {
+      opacity: 1;
+      transform: none;
     }
   }
 
@@ -215,13 +311,16 @@ const description = `${profile.name} — ${profile.title}. ${profile.blurb}`;
     100% { box-shadow: 0 0 0 0 transparent; }
   }
 
+  /* `background-clip: text` can't be used here. The characters have to be
+     inline-block to accept a transform, which makes each one an atomic inline
+     whose glyphs are no longer part of the <h1>'s own text run — so the
+     clipped gradient never paints into them and the name renders invisible.
+     Each character samples the ramp itself instead, which survives transforms
+     and gives the same left-to-right warm-to-cool sweep. */
   .intro__name {
     font-size: var(--text-3xl);
     line-height: 1.02;
-    background: linear-gradient(120deg, #fff 20%, #ffd7a0 55%, #9fc8ff 90%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: #fff5e2;
   }
 
   .intro__headline {

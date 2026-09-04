@@ -20,6 +20,12 @@ const FOCUSABLE = [
 export interface ModalEvents {
   onOpen?: (id: string) => void;
   onClose?: () => void;
+  /**
+   * Intercepts a user-initiated open (a `[data-open]` click). Lets the host
+   * run something first - flying the camera to the planet, say - and call
+   * `open()` itself when it's ready. Hash routing bypasses this.
+   */
+  onRequest?: (id: string, trigger: HTMLElement | null) => void;
 }
 
 export class ModalController {
@@ -45,7 +51,9 @@ export class ModalController {
       trigger.addEventListener('click', (event) => {
         event.preventDefault();
         const id = trigger.dataset.open;
-        if (id) this.open(id, trigger);
+        if (!id) return;
+        if (this.events.onRequest) this.events.onRequest(id, trigger);
+        else this.open(id, trigger);
       });
     }
 

@@ -146,24 +146,69 @@ export function asset(path: string): string {
  * actually earns its place — identity lines interleaved with facts.
  */
 export const phrases = [
+  // Keep an identity line first — this is what renders statically under
+  // prefers-reduced-motion, where nothing ever types out.
   'The Moundhalaverse',
+
+  // Identity
   'Software engineer in progress',
-  'Welcome, traveler',
-  'Every star you see is in the past',
-  'Built with light and stubbornness',
-  'Light takes 8 minutes to reach Earth',
-  'The Moundhalaverse awaits',
-  'Your atoms were once stardust',
-  'Ship it, then make it better',
-  'Space has a temperature: -455°F',
-  'Explore my universe',
-  'Neutron stars spin 600 times a second',
   'From Burkina Faso to Pennsylvania',
-  'Atoms never actually touch',
-  'The Moundhalaverse expands',
-  'Gravity bends light like a lens',
+  'Built with light and stubbornness',
+  'Ship it, then make it better',
   'Five planets, one résumé',
-  'A spoonful of neutron star weighs a billion tons',
+  'Fluent in French and JavaScript',
   'Still compiling',
+  'Welcome, traveler',
+  'Explore my universe',
+  'The Moundhalaverse awaits',
+  'The Moundhalaverse expands',
+
+  // Light and time
+  'Every star you see is in the past',
+  'Light takes 8 minutes to reach Earth',
+  'Gravity bends light like a lens',
+  'Time runs faster at your head than your feet',
+  'Sunlight took millennia to escape the Sun',
+  'Nothing outruns light',
+  'A light-year is a distance, not a duration',
+
+  // Scale
+  'A million Earths would fit inside the Sun',
+  'The Sun is 99.8% of the solar system',
+  'The observable universe: 93 billion light-years',
+  'More stars than grains of sand on Earth',
   'Most of the universe is dark energy',
+  'Andromeda reaches us in 4 billion years',
+  'The universe is 13.8 billion years old',
+
+  // Extremes
+  'A teaspoon of neutron star weighs a billion tons',
+  'Neutron stars spin up to 700 times a second',
+  'The Sun sheds 4 million tons a second',
+  'Space is colder than 450 below zero',
+  'Sound has no medium to travel in space',
+  'Black holes slowly evaporate',
+
+  // The neighbourhood
+  'A day on Venus outlasts its year',
+  'Venus spins backwards',
+  'Mars has blue sunsets',
+  'Olympus Mons dwarfs Everest',
+  'Saturn is less dense than water',
+  "Jupiter's Great Red Spot is shrinking",
+  'It likely rains diamonds on Neptune',
+  'Neptune has winds over 1,000 mph',
+  'Mercury keeps ice in its shadowed craters',
+  'A year on Neptune is 165 of ours',
+  'Pluto has not finished one orbit since 1930',
+  'The Moon drifts 3.8 cm away each year',
+
+  // Closer to home
+  'Your atoms were once stardust',
+  'Atoms never actually touch',
+  'Tardigrades have survived open space',
+  'Astronauts get taller in orbit',
+  'The ISS laps the Earth every 90 minutes',
+  'Voyager 1 has left the solar system',
+  'Astronauts say space smells like seared steak',
 ] as const;

@@ -11,7 +11,7 @@ import { Starfield, Nebula } from './objects/space';
 import { detectQuality, prefersReducedMotion } from './quality';
 import type { QualityProfile, SolarSystemOptions } from './types';
 
-const INTRO_DURATION = 2.1;
+const INTRO_DURATION = 4.4;
 
 /**
  * The scene owner. Public surface is deliberately small: construct it, call
@@ -119,6 +119,12 @@ export class SolarSystem {
     this.resize();
     this.bindEvents();
 
+    // Build every shader program up front. Otherwise the first frame that
+    // brings a new material on screen compiles it mid-flight, and the whole
+    // main thread stalls for tens of milliseconds — which is exactly what made
+    // the entrance stutter.
+    this.renderer.compile(this.scene, this.rig.camera);
+
     this.rig.beginIntro(INTRO_DURATION);
     if (this.reducedMotion) this.reveal = 1;
 
@@ -128,16 +134,20 @@ export class SolarSystem {
 
   // --- Public API ----------------------------------------------------------
 
-  focus(id: string): void {
+  /** Flies to a section. `onArrive` fires once the camera lands. */
+  focus(id: string, onArrive?: () => void): void {
     const planet = this.planets.find((p) => p.config.id === id);
     if (planet) {
-      this.rig.focusOn(() => planet.worldPosition, planet.config.size);
+      this.rig.focusOn(() => planet.worldPosition, planet.config.size, onArrive);
       return;
     }
     // 'about' is also reachable through the star at the centre.
     if (id === 'about') {
-      this.rig.focusOn(() => new THREE.Vector3(0, 0, 0), SUN_RADIUS);
+      this.rig.focusOn(() => new THREE.Vector3(0, 0, 0), SUN_RADIUS, onArrive);
+      return;
     }
+    // Unknown id: don't strand a caller waiting on an arrival that never comes.
+    onArrive?.();
   }
 
   release(): void {
@@ -313,7 +323,9 @@ export class SolarSystem {
     const elapsed = this.elapsedSeconds;
 
     if (this.reveal < 1) {
-      this.reveal = Math.min(this.reveal + delta / INTRO_DURATION, 1);
+      // Slightly faster than the camera move, so the system is fully present
+      // before the flight finishes settling.
+      this.reveal = Math.min(this.reveal + delta / (INTRO_DURATION * 0.7), 1);
     }
 
     this.rig.update(delta);

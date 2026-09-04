@@ -32,16 +32,63 @@ export function boot(config: BootConfig): void {
     }
   }
 
+  // Selecting a section flies the camera to its planet and only then reveals
+  // the panel. `sequencing` marks the opens that already did their flight, so
+  // the onOpen hook doesn't start a second one.
+  let sequencing = false;
+  let pendingToken = 0;
+  let pendingTimer = 0;
+
   const modals = new ModalController(document, scrim, {
+    onRequest: (id, trigger) => requestSection(id, trigger),
     onOpen: (id) => {
-      system?.focus(id);
       setActiveNav(id);
+      // Opens that bypassed requestSection - hash routing, browser back and
+      // forward - still need the camera moved.
+      if (!sequencing) system?.focus(id);
     },
     onClose: () => {
+      pendingToken += 1; // strand any in-flight reveal
+      window.clearTimeout(pendingTimer);
       system?.release();
       setActiveNav(null);
     },
   });
+
+  function requestSection(id: string, trigger: HTMLElement | null = null): void {
+    if (modals.current === id) return;
+
+    // Light up the nav immediately so the click registers during the flight.
+    setActiveNav(id);
+
+    if (!system) {
+      modals.open(id, trigger);
+      return;
+    }
+
+    const token = (pendingToken += 1);
+    window.clearTimeout(pendingTimer);
+
+    const reveal = (): void => {
+      if (token !== pendingToken) return; // a newer selection took over
+      window.clearTimeout(pendingTimer);
+      sequencing = true;
+      modals.open(id, trigger);
+      sequencing = false;
+    };
+
+    // Safety net: the render loop is paused while the tab is hidden, so the
+    // arrival callback can be arbitrarily late. Never strand the panel behind
+    // an animation that may not be running.
+    pendingTimer = window.setTimeout(reveal, 2200);
+
+    system.focus(id, reveal);
+  }
+
+  function cancelPending(): void {
+    pendingToken += 1;
+    window.clearTimeout(pendingTimer);
+  }
 
   // --- Headline -------------------------------------------------------------
 
@@ -109,13 +156,32 @@ export function boot(config: BootConfig): void {
   const stage = $('#stage');
   const hoverLabel = $('#hover-label');
 
-  if (!canvas || !stage) return;
+  /**
+   * Releases the entrance animations. Every path has to reach this — the copy
+   * starts at opacity 0, so failing to call it would leave the page blank.
+   * Idempotent, and backed by a timeout below.
+   */
+  let released = false;
+  function markReady(): void {
+    if (released) return;
+    released = true;
+    document.body.dataset.stage = 'ready';
+  }
+
+  // Backstop: however the scene goes, the content appears.
+  window.setTimeout(markReady, 3000);
+
+  if (!canvas || !stage) {
+    markReady();
+    return;
+  }
 
   if (!supportsWebGL()) {
     // Content is server-rendered and fully reachable without the scene; just
     // drop the canvas and let the static backdrop show.
     stage.dataset.mode = 'fallback';
     canvas.remove();
+    markReady();
     return;
   }
 
@@ -128,7 +194,7 @@ export function boot(config: BootConfig): void {
         canvas,
         planets: config.planets,
         portraitUrl: config.portraitUrl,
-        onSelect: (id) => modals.open(id),
+        onSelect: (id) => requestSection(id),
         onHoverChange: (hover) => {
           if (!hoverLabel) return;
           if (!hover) {
@@ -142,6 +208,9 @@ export function boot(config: BootConfig): void {
         onReady: () => {
           stage.dataset.mode = 'ready';
           if (speedControl) applySpeed(speedControl.value);
+          // Shaders are compiled by this point, so the main thread is free for
+          // the entrance to run smoothly.
+          markReady();
         },
       });
 
@@ -151,6 +220,7 @@ export function boot(config: BootConfig): void {
     } catch {
       stage.dataset.mode = 'fallback';
       canvas.remove();
+      markReady();
     }
   };
 
@@ -194,8 +264,14 @@ export function boot(config: BootConfig): void {
       case 'Enter':
         if (cursor >= 0) {
           event.preventDefault();
-          modals.open(order[cursor]!);
+          requestSection(order[cursor]!);
         }
+        break;
+      case 'Escape':
+        // No panel is open yet, so this aborts a flight in progress.
+        cancelPending();
+        system?.release();
+        setActiveNav(null);
         break;
       default:
         break;

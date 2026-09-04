@@ -23,6 +23,10 @@ html {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    /* Delays must go too. With a near-zero duration but a live delay, every
+       staggered element would sit at its invisible `from` state for seconds. */
+    animation-delay: 0s !important;
+    transition-delay: 0s !important;
   }
 }
 
