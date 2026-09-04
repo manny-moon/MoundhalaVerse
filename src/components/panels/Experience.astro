@@ -1,0 +1,196 @@
+---
+import { getCollection } from 'astro:content';
+import Panel from '../Panel.astro';
+import Icon from '../Icon.astro';
+import { formatRange } from '@lib/site';
+
+const entries = await getCollection('experience');
+// Newest first — collections don't guarantee file order.
+const timeline = entries.sort((a, b) => b.data.start.localeCompare(a.data.start));
+---
+
+<Panel
+  id="experience"
+  title="Experience"
+  subtitle="Four roles, two of them the same team twice"
+  accent="#4ECDC4"
+  icon="briefcase"
+>
+  <ol class="timeline">
+    {
+      timeline.map((entry) => (
+        <li class="entry" style={`--entry-accent: ${entry.data.accent};`}>
+          <div class="entry__marker" aria-hidden="true">
+            <Icon name={entry.data.icon} size={16} />
+          </div>
+
+          <article class="entry__body">
+            <header class="entry__head">
+              <h3 class="entry__role">{entry.data.role}</h3>
+              <p class="entry__company">
+                {entry.data.company}
+                <span class="entry__dot" aria-hidden="true">·</span>
+                <span class="entry__location">{entry.data.location}</span>
+              </p>
+              <p class="entry__dates">
+                <time datetime={entry.data.start}>{formatRange(entry.data.start, entry.data.end)}</time>
+              </p>
+            </header>
+
+            <p class="entry__summary">{entry.data.summary}</p>
+
+            <ul class="entry__highlights">
+              {entry.data.highlights.map((highlight) => (
+                <li>{highlight}</li>
+              ))}
+            </ul>
+
+            {entry.data.stack.length > 0 && (
+              <ul class="entry__stack">
+                {entry.data.stack.map((item) => (
+                  <li class="pill">{item}</li>
+                ))}
+              </ul>
+            )}
+          </article>
+        </li>
+      ))
+    }
+  </ol>
+</Panel>
+
+<style>
+  .timeline {
+    display: grid;
+    gap: var(--sp-5);
+  }
+
+  .entry {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--sp-4);
+    --accent: var(--entry-accent);
+  }
+
+  /* Connecting rail between markers. */
+  .entry:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 1.09rem;
+    top: 2.6rem;
+    bottom: calc(var(--sp-5) * -1);
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--entry-accent) 55%, transparent),
+      transparent
+    );
+  }
+
+  .entry__marker {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin-top: 0.2rem;
+    border-radius: var(--radius-full);
+    color: var(--entry-accent);
+    background: color-mix(in srgb, var(--entry-accent) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--entry-accent) 40%, transparent);
+    box-shadow: 0 0 22px -8px var(--entry-accent);
+  }
+
+  .entry__body {
+    padding: var(--sp-4);
+    border: 1px solid var(--glass-line);
+    border-radius: var(--radius);
+    background: rgb(255 255 255 / 0.02);
+    transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+
+  .entry__body:hover {
+    border-color: color-mix(in srgb, var(--entry-accent) 42%, transparent);
+    transform: translateY(-2px);
+  }
+
+  .entry__head {
+    margin-bottom: var(--sp-3);
+  }
+
+  .entry__role {
+    font-size: var(--text-lg);
+  }
+
+  .entry__company {
+    margin-top: 0.15rem;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--entry-accent);
+  }
+
+  .entry__dot {
+    margin: 0 0.4em;
+    color: var(--ink-faint);
+  }
+
+  .entry__location {
+    font-weight: 400;
+    color: var(--ink-mute);
+  }
+
+  .entry__dates {
+    margin-top: 0.2rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.03em;
+    color: var(--ink-faint);
+  }
+
+  .entry__summary {
+    margin-bottom: var(--sp-3);
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+  }
+
+  .entry__highlights {
+    display: grid;
+    gap: var(--sp-2);
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+  }
+
+  .entry__highlights li {
+    position: relative;
+    padding-left: 1.35rem;
+  }
+
+  .entry__highlights li::before {
+    content: '';
+    position: absolute;
+    left: 0.2rem;
+    top: 0.66em;
+    width: 0.38rem;
+    height: 0.38rem;
+    rotate: 45deg;
+    background: var(--entry-accent);
+  }
+
+  .entry__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-top: var(--sp-4);
+  }
+
+  @media (max-width: 34rem) {
+    .entry {
+      grid-template-columns: 1fr;
+      gap: var(--sp-3);
+    }
+
+    .entry::before {
+      display: none;
+    }
+  }
+</style>

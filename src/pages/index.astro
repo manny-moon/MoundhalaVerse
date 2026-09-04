@@ -1,0 +1,303 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import SceneNav from '@components/SceneNav.astro';
+import SettingsPanel from '@components/SettingsPanel.astro';
+import Icon from '@components/Icon.astro';
+import About from '@components/panels/About.astro';
+import Experience from '@components/panels/Experience.astro';
+import Projects from '@components/panels/Projects.astro';
+import Skills from '@components/panels/Skills.astro';
+import Contact from '@components/panels/Contact.astro';
+import { profile, asset } from '@lib/site';
+
+const description = `${profile.name} — ${profile.title}. ${profile.blurb}`;
+---
+
+<BaseLayout title="The Moundhalaverse · Emmanuel Moundhala" description={description}>
+  <!-- The WebGL stage. Decorative: every section it links to is also reachable
+       from the nav rail and from /resume, so nothing here is load-bearing. -->
+  <div id="stage" class="stage" data-mode="loading">
+    <canvas id="scene" class="stage__canvas" aria-hidden="true"></canvas>
+    <div class="stage__fallback" aria-hidden="true"></div>
+    <p id="hover-label" class="stage__label" aria-hidden="true" hidden></p>
+  </div>
+
+  <main id="main" class="hud">
+    <header class="intro">
+      <p class="intro__eyebrow">
+        <span class="intro__pulse" aria-hidden="true"></span>
+        {profile.title} · Messiah University ’27
+      </p>
+
+      <h1 class="intro__name">{profile.name}</h1>
+
+      <p class="intro__headline">
+        <span id="headline" class="headline" aria-live="off">The Moundhalaverse</span>
+      </p>
+
+      <p class="visually-hidden">
+        An interactive solar system. Each planet opens a section of this portfolio. Use the
+        navigation below, or the arrow keys, to explore without the 3D view.
+      </p>
+
+      <p class="intro__blurb">{profile.blurb}</p>
+
+      <div class="intro__actions">
+        <button type="button" class="btn btn--solid" data-open="projects">
+          <Icon name="code" size={16} /> See my work
+        </button>
+        <a class="btn" href={asset('/resume')}>
+          <Icon name="external" size={16} /> Résumé
+        </a>
+        <a class="btn" href={profile.links.github} target="_blank" rel="noopener noreferrer">
+          <Icon name="github" size={16} /> GitHub
+        </a>
+      </div>
+    </header>
+  </main>
+
+  <SceneNav />
+  <SettingsPanel />
+
+  <div id="scrim" class="scrim" hidden></div>
+
+  <About />
+  <Experience />
+  <Projects />
+  <Skills />
+  <Contact />
+</BaseLayout>
+
+<script>
+  import { boot } from '@scripts/app';
+  import { sections, phrases, profile, asset } from '@lib/site';
+
+  boot({
+    planets: sections,
+    phrases,
+    portraitUrl: asset(profile.sunTexture),
+  });
+</script>
+
+<style>
+  .stage {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-canvas);
+    background: radial-gradient(ellipse at 50% 42%, #171a3d 0%, #08081a 55%, #04040e 100%);
+  }
+
+  .stage__canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0;
+    transition: opacity 900ms var(--ease-out);
+  }
+
+  .stage[data-mode='ready'] .stage__canvas {
+    opacity: 1;
+  }
+
+  /* Shown when WebGL is unavailable or the scene chunk fails to load. */
+  .stage__fallback {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity var(--dur-slow) var(--ease);
+    background:
+      radial-gradient(1.5px 1.5px at 20% 30%, rgb(255 255 255 / 0.7), transparent),
+      radial-gradient(1.5px 1.5px at 70% 20%, rgb(255 255 255 / 0.5), transparent),
+      radial-gradient(2px 2px at 40% 70%, rgb(255 255 255 / 0.6), transparent),
+      radial-gradient(1px 1px at 85% 60%, rgb(255 255 255 / 0.5), transparent),
+      radial-gradient(1.5px 1.5px at 10% 80%, rgb(255 255 255 / 0.4), transparent),
+      radial-gradient(circle at 50% 45%, rgb(255 176 32 / 0.28), transparent 40%);
+  }
+
+  .stage[data-mode='fallback'] .stage__fallback {
+    opacity: 1;
+  }
+
+  /* Floating planet label, positioned from the render loop. */
+  .stage__label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0.3rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    pointer-events: none;
+    color: var(--ink);
+    background: rgb(4 4 14 / 0.78);
+    border: 1px solid var(--glass-line-strong);
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(8px);
+    will-change: transform;
+  }
+
+  /* --- HUD ---------------------------------------------------------------- */
+
+  /* Guarantees contrast for the copy no matter where the star drifts. The
+     scene is bright and moves; the text can't be left to chance. */
+  .hud::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      100deg,
+      rgb(4 4 14 / 0.92) 0%,
+      rgb(4 4 14 / 0.78) 26%,
+      rgb(4 4 14 / 0.35) 48%,
+      transparent 68%
+    );
+  }
+
+  .hud {
+    position: relative;
+    z-index: var(--z-chrome);
+    display: flex;
+    align-items: center;
+    min-height: 100svh;
+    padding:
+      max(var(--sp-6), env(safe-area-inset-top))
+      max(var(--sp-6), env(safe-area-inset-right))
+      calc(var(--sp-8) + 3rem)
+      max(var(--sp-6), env(safe-area-inset-left));
+    pointer-events: none;
+  }
+
+  /* Only interactive children take pointer events — the rest of the HUD lets
+     clicks fall through to the canvas so the scene stays draggable. */
+  .hud :global(a),
+  .hud :global(button) {
+    pointer-events: auto;
+  }
+
+  .intro {
+    max-width: 34rem;
+    display: grid;
+    gap: var(--sp-4);
+    animation: rise 900ms var(--ease-out) both;
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      translate: 0 14px;
+    }
+  }
+
+  .intro__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    color: var(--ink-mute);
+  }
+
+  .intro__pulse {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--experience);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--experience) 70%, transparent);
+    animation: pulse 2.4s ease-out infinite;
+  }
+
+  @keyframes pulse {
+    70% { box-shadow: 0 0 0 0.6rem transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+
+  .intro__name {
+    font-size: var(--text-3xl);
+    line-height: 1.02;
+    background: linear-gradient(120deg, #fff 20%, #ffd7a0 55%, #9fc8ff 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .intro__headline {
+    min-height: 1.9em;
+    font-family: var(--font-mono);
+    font-size: var(--text-lg);
+    color: var(--ink-soft);
+  }
+
+  .headline::after {
+    content: '';
+    display: inline-block;
+    width: 0.6ch;
+    height: 1.05em;
+    margin-left: 0.15em;
+    vertical-align: text-bottom;
+    background: var(--contact);
+    animation: caret 1.05s step-end infinite;
+  }
+
+  .headline.is-static::after {
+    animation: none;
+    opacity: 0.5;
+  }
+
+  @keyframes caret {
+    50% { opacity: 0; }
+  }
+
+  .intro__blurb {
+    color: var(--ink-mute);
+    font-size: var(--text-base);
+  }
+
+  .intro__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-top: var(--sp-2);
+  }
+
+  /* --- Scrim -------------------------------------------------------------- */
+
+  .scrim {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-scrim);
+    background: rgb(2 2 8 / 0.72);
+    backdrop-filter: blur(7px);
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease);
+  }
+
+  .scrim.is-open {
+    opacity: 1;
+  }
+
+  @media (max-width: 46rem) {
+    .hud::before {
+      background: linear-gradient(
+        to bottom,
+        rgb(4 4 14 / 0.94) 0%,
+        rgb(4 4 14 / 0.86) 38%,
+        rgb(4 4 14 / 0.45) 58%,
+        transparent 76%
+      );
+    }
+
+    .hud {
+      align-items: flex-start;
+      padding-top: calc(env(safe-area-inset-top) + 4.5rem);
+      padding-bottom: 9rem;
+    }
+
+    .intro {
+      max-width: none;
+    }
+  }
+</style>

@@ -1,0 +1,161 @@
+---
+import { getCollection } from 'astro:content';
+import Panel from '../Panel.astro';
+import Icon from '../Icon.astro';
+import { asset } from '@lib/site';
+
+const entries = await getCollection('projects');
+const projects = entries.sort((a, b) => b.data.year - a.data.year);
+
+const LINK_ICONS: Record<string, string> = {
+  demo: 'external',
+  code: 'github',
+  writeup: 'book',
+};
+---
+
+<Panel
+  id="projects"
+  title="Projects"
+  subtitle="Things I built because I wanted them to exist"
+  accent="#45B7D1"
+  icon="code"
+>
+  <div class="grid">
+    {
+      projects.map((project) => (
+        <article class="project">
+          <div class="project__media">
+            <img
+              src={asset(project.data.image)}
+              alt={`Screenshot of ${project.data.title}`}
+              loading="lazy"
+              decoding="async"
+              width="640"
+              height="360"
+            />
+            <span class="project__year">{project.data.year}</span>
+          </div>
+
+          <div class="project__content">
+            <h3 class="project__title">{project.data.title}</h3>
+            <p class="project__tagline">{project.data.tagline}</p>
+            <p class="project__description">{project.data.description}</p>
+
+            <ul class="project__tags">
+              {project.data.tags.map((tag) => (
+                <li class="pill">{tag}</li>
+              ))}
+            </ul>
+
+            {project.data.links.length > 0 && (
+              <div class="project__links">
+                {project.data.links.map((link) => (
+                  <a class="btn" href={link.href} target="_blank" rel="noopener noreferrer">
+                    <Icon name={LINK_ICONS[link.kind] ?? 'external'} size={15} />
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</Panel>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(19rem, 100%), 1fr));
+    gap: var(--sp-4);
+  }
+
+  .project {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--glass-line);
+    border-radius: var(--radius);
+    background: rgb(255 255 255 / 0.02);
+    transition:
+      border-color var(--dur) var(--ease),
+      transform var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+  }
+
+  .project:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    transform: translateY(-3px);
+    box-shadow: 0 22px 44px -26px var(--accent-glow);
+  }
+
+  .project__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--deep-2), var(--surface));
+  }
+
+  .project__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale var(--dur-slow) var(--ease-out);
+  }
+
+  .project:hover .project__media img {
+    scale: 1.04;
+  }
+
+  .project__year {
+    position: absolute;
+    top: var(--sp-3);
+    right: var(--sp-3);
+    padding: 0.2em 0.7em;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink);
+    background: rgb(4 4 14 / 0.72);
+    border: 1px solid var(--glass-line);
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(6px);
+  }
+
+  .project__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+  }
+
+  .project__title {
+    font-size: var(--text-lg);
+  }
+
+  .project__tagline {
+    font-size: var(--text-sm);
+    font-weight: 550;
+    color: var(--accent);
+  }
+
+  .project__description {
+    font-size: var(--text-sm);
+    color: var(--ink-mute);
+  }
+
+  .project__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+
+  .project__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-top: auto;
+    padding-top: var(--sp-2);
+  }
+</style>

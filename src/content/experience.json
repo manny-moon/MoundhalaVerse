@@ -1,0 +1,71 @@
+[
+  {
+    "id": "katapult-2026",
+    "company": "Katapult Engineering",
+    "role": "Software Engineering Intern",
+    "location": "Dillsburg, PA",
+    "start": "2026-05",
+    "end": "2026-08",
+    "icon": "building",
+    "accent": "#4ECDC4",
+    "summary": "Second summer on the team — owned infrastructure work end to end and ran the billable backlog solo.",
+    "highlights": [
+      "Owned server setup and migration for client environments start to finish, provisioning and configuring resources on Google Cloud Platform and building a repeatable workflow the development team continued using.",
+      "Built and integrated REST APIs connecting client-facing features to backend services, using Firebase for data storage and authentication on select projects.",
+      "Reviewed pull requests and gave code review feedback across the team, catching bugs before release and keeping the codebase consistent with team standards.",
+      "Managed the team's billable backlog independently during a stretch with more priorities than people, keeping deliverables on schedule for utility clients OG&E and PPL."
+    ],
+    "stack": ["Google Cloud Platform", "REST APIs", "Firebase", "Code Review"]
+  },
+  {
+    "id": "katapult-2025",
+    "company": "Katapult Engineering",
+    "role": "Software Engineering Intern",
+    "location": "Dillsburg, PA",
+    "start": "2025-05",
+    "end": "2025-08",
+    "icon": "building",
+    "accent": "#45B7D1",
+    "summary": "First summer — shipped client-facing developer tooling and UI work.",
+    "highlights": [
+      "Developed an API resources widget to simplify extensibility tools for clients, including example API calls and an interactive UI for running or copying code with real dynamic output.",
+      "Designed and implemented embedded integration windows with modern, stylized UI components to improve usability.",
+      "Resolved critical software bugs, removing barriers that impacted client workflows and improving overall product reliability.",
+      "Collaborated in weekly Scrum cycles, strengthening agile development, teamwork, and project ownership."
+    ],
+    "stack": ["JavaScript", "REST APIs", "UI Engineering", "Scrum"]
+  },
+  {
+    "id": "google-cssi",
+    "company": "Google",
+    "role": "CSSI Intern",
+    "location": "Remote",
+    "start": "2022-06",
+    "end": "2022-08",
+    "icon": "google",
+    "accent": "#FF6B6B",
+    "summary": "Computer Science Summer Institute — sprint-based projects with Google engineering teams.",
+    "highlights": [
+      "Collaborated with Google engineering teams on weekly sprint projects, primarily using JavaScript frameworks with Node.js.",
+      "Used Firebase for backend and user authentication management, improving codebase management and review.",
+      "Partnered with fellow CSSI interns on end-of-term MVP projects."
+    ],
+    "stack": ["JavaScript", "Node.js", "Firebase"]
+  },
+  {
+    "id": "all-star-code",
+    "company": "All Star Code",
+    "role": "Front End Development Fellow",
+    "location": "New York, NY",
+    "start": "2021-06",
+    "end": "2021-08",
+    "icon": "code",
+    "accent": "#96CEB4",
+    "summary": "Intensive summer bootcamp — where the web development started.",
+    "highlights": [
+      "Bootcamp that built foundational skills in JavaScript, HTML, and CSS.",
+      "Finished with a collaborative capstone project using third-party APIs and Firebase."
+    ],
+    "stack": ["JavaScript", "HTML/CSS", "Firebase"]
+  }
+]

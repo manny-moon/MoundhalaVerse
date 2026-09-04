@@ -1,0 +1,114 @@
+---
+import { getCollection } from 'astro:content';
+import Panel from '../Panel.astro';
+import Icon from '../Icon.astro';
+
+const groups = await getCollection('skills');
+// Keep the authored order from skills.json rather than the loader's.
+const ORDER = ['languages', 'tools', 'coursework', 'spoken'];
+const ordered = groups.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
+---
+
+<Panel
+  id="skills"
+  title="Skills"
+  subtitle="What I reach for, and what I'm still learning"
+  accent="#96CEB4"
+  icon="wrench"
+>
+  <div class="groups">
+    {
+      ordered.map((group) => (
+        <section class="group">
+          <h3 class="group__title">
+            <Icon name={group.data.icon} size={17} />
+            {group.data.title}
+          </h3>
+
+          <ul class="group__items">
+            {group.data.items.map((item) => (
+              <li class="skill">
+                {item.icon && <Icon name={item.icon} size={18} />}
+                <span class="skill__name">{item.name}</span>
+                {item.note && <span class="skill__note">{item.note}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+
+  <p class="footnote">
+    Listed because I've shipped something with it — not because I've read about it.
+  </p>
+</Panel>
+
+<style>
+  .groups {
+    display: grid;
+    gap: var(--sp-5);
+  }
+
+  .group__title {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-3);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+
+  .group__items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr));
+    gap: var(--sp-2);
+  }
+
+  .skill {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3);
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+    border: 1px solid var(--glass-line);
+    border-radius: var(--radius-sm);
+    background: rgb(255 255 255 / 0.02);
+    transition:
+      border-color var(--dur) var(--ease),
+      color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+
+  .skill:hover {
+    color: var(--ink);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    transform: translateY(-2px);
+  }
+
+  .skill :global(.icon) {
+    color: var(--accent);
+  }
+
+  .skill__name {
+    min-width: 0;
+  }
+
+  .skill__note {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+  }
+
+  .footnote {
+    margin-top: var(--sp-5);
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--glass-line);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+  }
+</style>

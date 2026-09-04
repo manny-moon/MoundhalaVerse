@@ -1,0 +1,206 @@
+---
+import Panel from '../Panel.astro';
+import Icon from '../Icon.astro';
+import { profile, about, education, asset, formatRange } from '@lib/site';
+---
+
+<Panel
+  id="about"
+  title="About Me"
+  subtitle={`${profile.title} · ${profile.location}`}
+  accent="#FF6B6B"
+  icon="user"
+>
+  <div class="about">
+    <div class="about__intro">
+      <img
+        class="about__portrait"
+        src={asset(profile.avatar)}
+        alt={`${profile.name}, smiling`}
+        width="128"
+        height="128"
+        loading="lazy"
+        decoding="async"
+      />
+      <div class="about__lede">
+        {about.bio.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+    </div>
+
+    <div class="about__grid">
+      <section class="card">
+        <h3 class="card__title"><Icon name="graduation" size={17} /> Education</h3>
+        <p class="card__lead">{education.degree}</p>
+        <p class="card__meta">{education.school} · {education.location}</p>
+        <p class="card__meta">{formatRange(education.start, education.end)}</p>
+      </section>
+
+      <section class="card">
+        <h3 class="card__title"><Icon name="target" size={17} /> Current Goals</h3>
+        <ul class="ticks">
+          {about.goals.map((goal) => <li>{goal}</li>)}
+        </ul>
+      </section>
+
+      <section class="card card--wide">
+        <h3 class="card__title"><Icon name="heart" size={17} /> Outside the Editor</h3>
+        <ul class="tags">
+          {about.interests.map((interest) => (
+            <li class="pill">{interest}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="card card--wide card--cta">
+        <div>
+          <h3 class="card__title"><Icon name="sparkle" size={17} /> Résumé</h3>
+          <p class="card__meta">One page, kept in sync with everything on this site.</p>
+        </div>
+        <div class="actions">
+          <a class="btn btn--solid" href={asset(profile.resume)} target="_blank" rel="noopener">
+            <Icon name="eye" size={16} /> View
+          </a>
+          <a class="btn" href={asset(profile.resume)} download>
+            <Icon name="download" size={16} /> Download
+          </a>
+          <a class="btn" href={asset('/resume')}>
+            <Icon name="external" size={16} /> Read as a page
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+</Panel>
+
+<style>
+  .about {
+    display: grid;
+    gap: var(--sp-5);
+  }
+
+  .about__intro {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--sp-5);
+    align-items: start;
+  }
+
+  .about__portrait {
+    width: 7rem;
+    height: 7rem;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    box-shadow: 0 0 44px -14px var(--accent-glow);
+  }
+
+  .about__lede {
+    display: grid;
+    gap: var(--sp-3);
+    color: var(--ink-soft);
+  }
+
+  /* Explicit columns rather than auto-fit: the full-width cards below span to
+     -1, which stops auto-fit from collapsing the empty track and left a dead
+     third column on wide screens. */
+  .about__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--sp-4);
+  }
+
+  @media (min-width: 46rem) {
+    .about__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .card {
+    padding: var(--sp-4);
+    border: 1px solid var(--glass-line);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--accent) 4%, rgb(255 255 255 / 0.02));
+    transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+  }
+
+  .card:hover {
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, rgb(255 255 255 / 0.03));
+  }
+
+  .card--wide {
+    grid-column: 1 / -1;
+  }
+
+  .card--cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+
+  .card__title {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-3);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+
+  .card__lead {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .card__meta {
+    font-size: var(--text-sm);
+    color: var(--ink-mute);
+  }
+
+  .ticks {
+    display: grid;
+    gap: var(--sp-2);
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+  }
+
+  .ticks li {
+    position: relative;
+    padding-left: 1.35rem;
+  }
+
+  .ticks li::before {
+    content: '';
+    position: absolute;
+    left: 0.15rem;
+    top: 0.62em;
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+
+  @media (max-width: 34rem) {
+    .about__intro {
+      grid-template-columns: 1fr;
+      justify-items: start;
+    }
+  }
+</style>

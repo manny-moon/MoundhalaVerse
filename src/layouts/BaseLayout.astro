@@ -1,0 +1,91 @@
+---
+import { profile, education, asset } from '@lib/site';
+import '@styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Suppresses the animated backdrop on document-style pages like /resume. */
+  plain?: boolean;
+}
+
+const { title, description, plain = false } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const ogImage = new URL(asset('/images/manny.jpg'), Astro.site).toString();
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  jobTitle: profile.title,
+  email: `mailto:${profile.email}`,
+  url: canonical,
+  image: ogImage,
+  alumniOf: {
+    '@type': 'CollegeOrUniversity',
+    name: education.school,
+  },
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Mechanicsburg',
+    addressRegion: 'PA',
+    addressCountry: 'US',
+  },
+  sameAs: [profile.links.github, profile.links.linkedin],
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta name="author" content={profile.name} />
+    <meta name="theme-color" content="#04040e" />
+    <meta name="color-scheme" content="dark" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="The Moundhalaverse" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content={`Portrait of ${profile.name}`} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="icon" href={asset('/favicon.svg')} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={asset('/favicon.svg')} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap"
+    />
+
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} is:inline />
+  </head>
+
+  <body data-plain={plain ? 'true' : undefined}>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  /* Keeps the page from scrolling behind an open panel without the layout
+     shift that `overflow: hidden` alone causes on iOS. */
+  body[data-modal-open='true'] {
+    overflow: hidden;
+  }
+</style>

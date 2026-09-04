@@ -1,0 +1,46 @@
+[
+  {
+    "id": "moundhalaverse",
+    "title": "The Moundhalaverse",
+    "year": 2026,
+    "tagline": "This site. An interactive WebGL solar system where every planet is a section of my work.",
+    "description": "A personal portfolio built as a real-time 3D scene. Procedurally shaded planets orbit a sun, and clicking one flies the camera in and opens that section. Content lives in schema-validated collections so the site can never drift out of sync with my resume, and every interaction has a keyboard and reduced-motion path.",
+    "image": "/images/moundhalaverse.png",
+    "tags": [
+      "Astro",
+      "TypeScript",
+      "Three.js",
+      "GLSL",
+      "WebGL"
+    ],
+    "featured": true,
+    "links": [
+      {
+        "label": "Source",
+        "href": "https://github.com/Arcullius/MannyPort",
+        "kind": "code"
+      }
+    ]
+  },
+  {
+    "id": "roots",
+    "title": "Roots",
+    "year": 2023,
+    "tagline": "An all-in-one hiking companion for planning a day on the trail.",
+    "description": "A web application that pulls trail information together in one place, with a live weather feature backed by a third-party weather API and a parallax-scrolling interface built to make route planning feel less like reading a spreadsheet.",
+    "image": "/images/roots.png",
+    "tags": [
+      "JavaScript",
+      "HTML/CSS",
+      "Weather API"
+    ],
+    "featured": true,
+    "links": [
+      {
+        "label": "Live demo",
+        "href": "https://manny-moon.github.io/Roots/",
+        "kind": "demo"
+      }
+    ]
+  }
+]

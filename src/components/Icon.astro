@@ -1,0 +1,138 @@
+---
+/**
+ * Inline SVG icons.
+ *
+ * Replaces the Font Awesome CDN stylesheet the previous build loaded on every
+ * page — that was a render-blocking request to a third party for what amounts
+ * to about twenty glyphs. These ship in the HTML and cost nothing extra.
+ *
+ * Stroke-based, 24x24 viewBox, inheriting `currentColor`.
+ */
+export type IconName =
+  | 'user'
+  | 'briefcase'
+  | 'code'
+  | 'wrench'
+  | 'mail'
+  | 'github'
+  | 'linkedin'
+  | 'download'
+  | 'eye'
+  | 'external'
+  | 'settings'
+  | 'close'
+  | 'building'
+  | 'google'
+  | 'database'
+  | 'cloud'
+  | 'flame'
+  | 'git'
+  | 'window'
+  | 'book'
+  | 'globe'
+  | 'phone'
+  | 'pin'
+  | 'graduation'
+  | 'sparkle'
+  | 'target'
+  | 'heart'
+  | 'arrow-right'
+  | 'keyboard'
+  | 'gauge'
+  | 'java'
+  | 'python'
+  | 'javascript'
+  | 'typescript'
+  | 'html';
+
+interface Props {
+  name: IconName | string;
+  size?: number | string;
+  class?: string;
+  /** Icons are decorative by default; pass a label to expose one to AT. */
+  label?: string;
+}
+
+const { name, size = 20, class: className = '', label } = Astro.props;
+
+/** Path data only — every icon shares the same stroke presentation below. */
+const PATHS: Record<string, string> = {
+  user: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
+  briefcase:
+    'M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16M4 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z',
+  code: 'm16 18 6-6-6-6M8 6l-6 6 6 6',
+  wrench:
+    'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z',
+  mail: 'M22 6 12 13 2 6M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z',
+  github:
+    'M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22',
+  linkedin:
+    'M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6ZM6 9H2v12h4V9ZM4 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
+  download: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3',
+  eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
+  external: 'M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3',
+  settings:
+    'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z',
+  close: 'M18 6 6 18M6 6l12 12',
+  building:
+    'M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 7h1M9 11h1M9 15h1M14 7h1M14 11h1M14 15h1',
+  google:
+    'M21.8 12.2c0-.7-.06-1.36-.18-2H12v3.8h5.5a4.7 4.7 0 0 1-2.04 3.09v2.56h3.3c1.93-1.78 3.04-4.4 3.04-7.45ZM12 22c2.75 0 5.06-.91 6.75-2.47l-3.3-2.56c-.92.62-2.1.98-3.45.98-2.65 0-4.9-1.79-5.7-4.2H2.9v2.64A10 10 0 0 0 12 22ZM6.3 13.75a6 6 0 0 1 0-3.83V7.28H2.9a10 10 0 0 0 0 8.98l3.4-2.51ZM12 5.98c1.5 0 2.84.51 3.9 1.52l2.92-2.92C17.06 2.95 14.75 2 12 2a10 10 0 0 0-9.1 5.72l3.4 2.64c.8-2.41 3.05-4.2 5.7-4.2Z',
+  database:
+    'M12 8c4.42 0 8-1.34 8-3s-3.58-3-8-3-8 1.34-8 3 3.58 3 8 3ZM4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3',
+  cloud: 'M17.5 19a4.5 4.5 0 1 0-1.4-8.78 6 6 0 1 0-10.6 5.03A4 4 0 0 0 6.5 19h11Z',
+  flame:
+    'M12 22c4 0 7-2.5 7-6.5 0-3-1.5-5-3-6.5-.5 1.5-1.5 2-2.5 2 .5-3-1-5.5-3.5-7 0 3-2 4-3.5 6C5 11.5 5 13.5 5 15.5 5 19.5 8 22 12 22Z',
+  git: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 8v8M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM12 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM16 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM16 10h-4',
+  window: 'M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1ZM3 9h18',
+  book: 'M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z',
+  globe: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z',
+  phone:
+    'M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z',
+  pin: 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
+  graduation: 'M22 10 12 5 2 10l10 5 10-5ZM6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5',
+  sparkle: 'M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3ZM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z',
+  target: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12ZM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
+  heart:
+    'M20.8 4.6a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z',
+  'arrow-right': 'M5 12h14M12 5l7 7-7 7',
+  keyboard:
+    'M2 6h20v12H2zM6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8',
+  gauge: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 12l4-4',
+  java: 'M9 18c-2 1-3 2 0 2.5 3 .5 7 .3 8.5-.5M10 14c-2 .8-3 1.8-.5 2.3 2.5.5 6 .3 7.5-.3M14 3c1.5 2-2 4-3 5.5-1 1.5 0 3 1.5 4M17 10c2 2 0 4-2 5',
+  python:
+    'M12 2c-3 0-3 1.5-3 3v2h6v1H7s-3 0-3 4 3 4 3 4h2v-2s0-2 2-2h4s2 0 2-2V5s0-3-3-3h-2ZM9.5 4.5a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2ZM15 22c3 0 3-1.5 3-3v-2h-6v-1h8s3 0 3-4-3-4-3-4h-2v2s0 2-2 2h-4s-2 0-2 2v4s0 3 3 3h2Zm2.5-2.5a.6.6 0 1 1 0 1.2.6.6 0 0 1 0-1.2Z',
+  javascript: 'M3 3h18v18H3zM9 12v5a1.5 1.5 0 0 1-3 0M13 16.5c.5.8 1.3 1.2 2.3 1.2 1.2 0 2-.6 2-1.5 0-2-4-1.3-4-3.7 0-1 .9-1.7 2.1-1.7.9 0 1.6.3 2.1 1',
+  typescript: 'M3 3h18v18H3zM8 11h6M11 11v7M15.5 17c.5.6 1.2.9 2 .9 1 0 1.7-.5 1.7-1.3 0-1.7-3.4-1.1-3.4-3.2 0-.8.7-1.4 1.8-1.4.7 0 1.3.2 1.7.8',
+  html: 'm4 3 1.6 17.2L12 22l6.4-1.8L20 3H4Zm12 5H9l.2 2.5h6.6l-.6 6.5-3.2.9-3.2-.9-.2-2.4',
+};
+
+const path = PATHS[name] ?? PATHS.sparkle!;
+const dimension = typeof size === 'number' ? `${size}px` : size;
+---
+
+<svg
+  class={`icon ${className}`}
+  width={dimension}
+  height={dimension}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden={label ? undefined : 'true'}
+  role={label ? 'img' : undefined}
+  focusable="false"
+>
+  {label && <title>{label}</title>}
+  <path d={path} />
+</svg>
+
+<style>
+  .icon {
+    flex: none;
+    display: inline-block;
+    vertical-align: middle;
+  }
+</style>

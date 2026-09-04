@@ -1,0 +1,174 @@
+---
+import Panel from '../Panel.astro';
+import Icon from '../Icon.astro';
+import { profile, asset } from '@lib/site';
+
+const channels = [
+  {
+    icon: 'mail',
+    label: 'Email',
+    value: profile.email,
+    href: `mailto:${profile.email}`,
+    note: 'Best way to reach me',
+  },
+  {
+    icon: 'linkedin',
+    label: 'LinkedIn',
+    value: '/in/emmanuel-moundhala',
+    href: profile.links.linkedin,
+    note: 'Connect',
+  },
+  {
+    icon: 'github',
+    label: 'GitHub',
+    value: '@Arcullius',
+    href: profile.links.github,
+    note: 'Code lives here',
+  },
+  {
+    icon: 'phone',
+    label: 'Phone',
+    value: profile.phone,
+    href: `tel:${profile.phone.replace(/\D/g, '')}`,
+    note: 'Calls and texts',
+  },
+] as const;
+---
+
+<Panel
+  id="contact"
+  title="Get In Touch"
+  subtitle="Open to internships and new-grad roles"
+  accent="#FFD98E"
+  icon="mail"
+>
+  <ul class="channels">
+    {
+      channels.map((channel) => (
+        <li>
+          <a
+            class="channel"
+            href={channel.href}
+            target={channel.href.startsWith('http') ? '_blank' : undefined}
+            rel={channel.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+          >
+            <span class="channel__icon" aria-hidden="true">
+              <Icon name={channel.icon} size={19} />
+            </span>
+            <span class="channel__text">
+              <span class="channel__label">{channel.label}</span>
+              <span class="channel__value">{channel.value}</span>
+              <span class="channel__note">{channel.note}</span>
+            </span>
+            <span class="channel__chevron" aria-hidden="true">
+              <Icon name="arrow-right" size={16} />
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="closer">
+    <p>
+      Currently a junior at Messiah University, graduating May 2027. If you're hiring interns
+      or looking for someone who'll actually read the pull request, say hello.
+    </p>
+    <a class="btn btn--solid" href={asset(profile.resume)} target="_blank" rel="noopener">
+      <Icon name="download" size={16} /> Grab my résumé
+    </a>
+  </div>
+</Panel>
+
+<style>
+  .channels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+    gap: var(--sp-3);
+  }
+
+  .channel {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    height: 100%;
+    padding: var(--sp-4);
+    text-decoration: none;
+    border: 1px solid var(--glass-line);
+    border-radius: var(--radius);
+    background: rgb(255 255 255 / 0.02);
+    transition:
+      border-color var(--dur) var(--ease),
+      background var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+
+  .channel:hover {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    transform: translateY(-2px);
+  }
+
+  .channel__icon {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    flex: none;
+    color: var(--accent);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--accent) 13%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+
+  .channel__text {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .channel__label {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+  }
+
+  .channel__value {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .channel__note {
+    font-size: var(--text-xs);
+    color: var(--ink-mute);
+  }
+
+  .channel__chevron {
+    margin-left: auto;
+    color: var(--ink-faint);
+    transition: color var(--dur) var(--ease), translate var(--dur) var(--ease);
+  }
+
+  .channel:hover .channel__chevron {
+    color: var(--accent);
+    translate: 3px 0;
+  }
+
+  .closer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    margin-top: var(--sp-5);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--glass-line);
+  }
+
+  .closer p {
+    flex: 1 1 20rem;
+    font-size: var(--text-sm);
+    color: var(--ink-mute);
+  }
+</style>

@@ -1,0 +1,206 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  id: string;
+  title: string;
+  subtitle?: string;
+  accent: string;
+  icon: string;
+}
+
+const { id, title, subtitle, accent, icon } = Astro.props;
+const headingId = `${id}-title`;
+---
+
+<section
+  class="panel glass scroll-area"
+  data-panel={id}
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby={headingId}
+  style={`--accent: ${accent};`}
+  hidden
+>
+  <header class="panel__head">
+    <div class="panel__heading">
+      <span class="panel__badge" aria-hidden="true">
+        <Icon name={icon} size={20} />
+      </span>
+      <div>
+        <h2 id={headingId} class="panel__title">{title}</h2>
+        {subtitle && <p class="panel__subtitle">{subtitle}</p>}
+      </div>
+    </div>
+
+    <button type="button" class="panel__close" data-close aria-label={`Close ${title}`}>
+      <Icon name="close" size={18} />
+    </button>
+  </header>
+
+  <div class="panel__body">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .panel {
+    position: fixed;
+    z-index: var(--z-modal);
+
+    /* Anchored in the viewport, never inside a transformed ancestor. */
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+
+    width: min(clamp(20rem, 92vw, 62rem), calc(100vw - 2rem));
+    max-height: min(86svh, 54rem);
+
+    padding: 0;
+    background: var(--glass-strong);
+    border-color: var(--glass-line);
+    border-radius: var(--radius-lg);
+    box-shadow:
+      0 40px 90px -20px rgb(0 0 0 / 0.75),
+      0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent),
+      0 0 90px -30px var(--accent-glow);
+
+    opacity: 0;
+    scale: 0.97;
+    transition:
+      opacity var(--dur) var(--ease-out),
+      scale var(--dur) var(--ease-out),
+      translate var(--dur) var(--ease-out);
+  }
+
+  .panel.is-open {
+    opacity: 1;
+    scale: 1;
+  }
+
+  /* A hairline of the section's accent along the top edge. */
+  .panel::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--accent) 22%,
+      color-mix(in srgb, var(--accent) 60%, white) 50%,
+      var(--accent) 78%,
+      transparent
+    );
+    opacity: 0.9;
+  }
+
+  .panel__head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding: var(--sp-5) var(--sp-6) var(--sp-4);
+    background: linear-gradient(
+      to bottom,
+      var(--glass-strong) 65%,
+      color-mix(in srgb, var(--glass-strong) 60%, transparent)
+    );
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--glass-line);
+  }
+
+  .panel__heading {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    min-width: 0;
+  }
+
+  .panel__badge {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  }
+
+  .panel__title {
+    font-size: var(--text-xl);
+    letter-spacing: -0.025em;
+  }
+
+  .panel__subtitle {
+    margin-top: 0.15rem;
+    font-size: var(--text-sm);
+    color: var(--ink-mute);
+  }
+
+  .panel__close {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: none;
+    color: var(--ink-soft);
+    border: 1px solid var(--glass-line);
+    border-radius: var(--radius-full);
+    transition:
+      color var(--dur) var(--ease),
+      background var(--dur) var(--ease),
+      border-color var(--dur) var(--ease),
+      rotate var(--dur) var(--ease);
+  }
+
+  .panel__close:hover {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    border-color: var(--accent);
+    rotate: 90deg;
+  }
+
+  .panel__body {
+    padding: var(--sp-5) var(--sp-6) var(--sp-6);
+  }
+
+  @media (max-width: 40rem) {
+    .panel {
+      width: 100vw;
+      max-width: 100vw;
+      max-height: 92svh;
+
+      /* Full-width sheet anchored to the bottom on phones. */
+      top: auto;
+      bottom: 0;
+      translate: -50% 0;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      transition:
+        opacity var(--dur) var(--ease-out),
+        translate var(--dur-slow) var(--ease-out);
+      scale: 1;
+    }
+
+    .panel:not(.is-open) {
+      translate: -50% 12%;
+    }
+
+    .panel.is-open {
+      translate: -50% 0;
+    }
+
+    .panel__head {
+      padding: var(--sp-4) var(--sp-4) var(--sp-3);
+    }
+
+    .panel__body {
+      padding: var(--sp-4);
+    }
+  }
+</style>

@@ -1,0 +1,145 @@
+---
+import Icon from './Icon.astro';
+import { sections } from '@lib/site';
+
+/**
+ * The keyboard- and touch-accessible route to every section.
+ *
+ * The WebGL canvas is inert to assistive technology, so this rail — not the
+ * planets — is the real navigation. On phones it becomes the primary control,
+ * which is what makes the site usable where the old orbit layout put half the
+ * planets off-screen.
+ */
+
+const ICONS: Record<string, string> = {
+  about: 'user',
+  projects: 'code',
+  experience: 'briefcase',
+  skills: 'wrench',
+  contact: 'mail',
+};
+---
+
+<nav class="rail" aria-label="Portfolio sections">
+  <ul>
+    {
+      sections.map((section) => (
+        <li>
+          <button
+            type="button"
+            class="rail__item"
+            style={`--accent: ${section.color};`}
+            data-open={section.id}
+            data-nav={section.id}
+            aria-current="false"
+          >
+            <span class="rail__dot" aria-hidden="true" />
+            <Icon name={ICONS[section.id] ?? 'sparkle'} size={17} />
+            <span class="rail__label">{section.label}</span>
+          </button>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .rail {
+    position: fixed;
+    z-index: var(--z-nav);
+    bottom: max(var(--sp-5), env(safe-area-inset-bottom));
+    left: 50%;
+    translate: -50% 0;
+  }
+
+  .rail ul {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+    padding: var(--sp-2);
+    background: var(--glass);
+    border: 1px solid var(--glass-line);
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    box-shadow: 0 20px 50px -24px rgb(0 0 0 / 0.9);
+  }
+
+  .rail__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 0.55rem 0.95rem;
+    font-size: var(--text-sm);
+    font-weight: 550;
+    color: var(--ink-mute);
+    border-radius: var(--radius-full);
+    transition:
+      color var(--dur) var(--ease),
+      background var(--dur) var(--ease);
+  }
+
+  .rail__item:hover,
+  .rail__item[aria-current='true'] {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+  }
+
+  .rail__item :global(.icon) {
+    transition: color var(--dur) var(--ease);
+  }
+
+  .rail__item:hover :global(.icon),
+  .rail__item[aria-current='true'] :global(.icon) {
+    color: var(--accent);
+  }
+
+  /* The dot echoes the planet's colour, so the rail and the scene read as one. */
+  .rail__dot {
+    position: absolute;
+    top: 0.32rem;
+    left: 50%;
+    translate: -50% 0;
+    width: 0.3rem;
+    height: 0.3rem;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease);
+  }
+
+  .rail__item[aria-current='true'] .rail__dot {
+    opacity: 1;
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  @media (max-width: 46rem) {
+    .rail {
+      width: min(100vw - 1.5rem, 34rem);
+    }
+
+    .rail ul {
+      justify-content: space-between;
+      border-radius: var(--radius-lg);
+    }
+
+    .rail__item {
+      flex-direction: column;
+      gap: 0.2rem;
+      flex: 1;
+      padding: 0.5rem 0.25rem;
+      font-size: var(--text-xs);
+    }
+
+    .rail__dot {
+      top: 0.15rem;
+    }
+  }
+
+  @media (max-width: 22rem) {
+    .rail__label {
+      display: none;
+    }
+  }
+</style>

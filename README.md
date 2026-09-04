@@ -1,39 +1,104 @@
-# The Moundhalaverse 
+# The Moundhalaverse
 
-## Overview
-This is an interactive portfolio website featuring a 3D solar system interface where each planet represents a different section of my portfolio. 
+My portfolio, built as a real-time WebGL solar system. Five planets orbit a
+procedurally-shaded star; clicking one flies the camera in and opens that
+section of my work.
 
-## Current Work in Progress
-I'm actively working on improving the user experience, particularly focusing on responsive design and zoom behavior. One of the current challenges I'm addressing is the modal scaling issue when users zoom out. This is similar to a problem I noticed on the Katapult website where popup menus were severely affected by browser zoom levels. I'm implementing solutions to maintain modal proportions and usability across different zoom levels.
+**Live:** https://arcullius.github.io/MannyPort
+**Plain-text résumé:** https://arcullius.github.io/MannyPort/resume
 
-## Technical Stack
-- HTML5
-- CSS3 
-- JavaScript 
-- Font Awesome for icons
-- Google Fonts (Space Mono)
+---
 
-## Features
-- Interactive 3D solar system interface
-- Smooth animations and transitions (hopefully)
-- Responsive design (mobile functionality still needs work)
-- Dynamic typewriter effect
-- Interactive planet orbits
-- Modal-based content display
-- Customizable settings panel
-- Starry background effects
+## Stack
 
-## Project Status
-This is a work in progress, with ongoing improvements to:
-- Modal scaling and responsiveness
-- Animation performance
-- Cross-browser compatibility
-- Accessibility features
+| | |
+|---|---|
+| **Framework** | [Astro](https://astro.build) 7 — static output, zero JS shipped for content |
+| **Language** | TypeScript (strict) |
+| **3D** | [three.js](https://threejs.org) r185 with custom GLSL |
+| **Content** | Astro content collections, Zod-validated |
+| **Hosting** | GitHub Pages via GitHub Actions |
 
-## Future Enhancements
-- Database integration for dynamic content
-- Enhanced mobile responsiveness
-- Additional interactive features
+No CSS framework and no UI library — the design system is about 200 lines of
+custom properties in [`src/styles/tokens.css`](src/styles/tokens.css).
 
-## Note
-This project is being developed as part of my portfolio and is subject to ongoing improvements and refinements. The code represents my current skill set and approach to modern web development. 
+## Running it
+
+```bash
+npm install
+npm run dev      # http://localhost:4321/MannyPort
+npm run build    # type-checks, validates content, writes dist/
+npm run preview  # serve the production build
+```
+
+Node 22+.
+
+## How it's organised
+
+```
+src/
+├── content/            # experience.json, projects.json, skills.json
+├── content.config.ts   # Zod schemas — a bad entry fails the build
+├── lib/site.ts         # profile, education, planet definitions, headlines
+├── components/
+│   ├── Panel.astro     # the accessible dialog shell every section uses
+│   ├── panels/         # About, Experience, Projects, Skills, Contact
+│   ├── SceneNav.astro  # the real navigation (keyboard + touch)
+│   └── Icon.astro      # inline SVG set, no icon-font CDN
+├── scripts/
+│   ├── solar-system/   # the WebGL scene
+│   │   ├── index.ts        # renderer, composer, raycasting, frame loop
+│   │   ├── camera-rig.ts   # idle drift, click-to-fly, intro dolly
+│   │   ├── objects/        # star, planet, starfield, nebula
+│   │   └── shaders/        # GLSL: noise, planet surfaces, sun, space
+│   ├── modals.ts       # focus trap, Escape, hash routing
+│   └── typewriter.ts
+└── pages/
+    ├── index.astro     # the solar system
+    └── resume.astro    # the plain, printable route
+```
+
+### Content is the source of truth
+
+Everything on the site — every bullet, date and tag — comes from
+`src/content/*.json` and `src/lib/site.ts`. Both the interactive site and
+`/resume` render from those same files, so the two can't drift apart. Adding a
+job is a few lines of JSON; the schema in `content.config.ts` fails the build
+if a field is missing or malformed.
+
+### The scene
+
+Every surface is generated in a shader — there are no texture downloads. Simplex
+noise drives four surface archetypes (rocky, ocean, gas, icy), each seeded
+deterministically from its section id so a given planet looks the same on every
+load. The star is layered plasma with granulation and faculae; hovering it
+crossfades a portrait into the photosphere.
+
+Rendering cost is chosen once at startup from device capability
+([`quality.ts`](src/scripts/solar-system/quality.ts)) rather than adapted
+mid-flight, so the frame budget stays predictable: pixel ratio, star count,
+sphere tessellation, and whether bloom and the nebula run at all.
+
+### Accessibility
+
+The canvas is `aria-hidden` and entirely decorative. The real navigation is a
+row of buttons, so every section is reachable by keyboard, screen reader and
+touch. Panels are `role="dialog"` with focus traps and focus restore, arrow
+keys move between planets, and each section has its own URL hash. With
+`prefers-reduced-motion` the intro flight, orbit drift and typewriter all stop
+while the site stays fully usable. If WebGL is missing the canvas is dropped and
+a static backdrop takes its place — no content depends on it.
+
+## Deploying
+
+Pushing to `master` triggers [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml),
+which type-checks, builds and publishes to GitHub Pages. Set **Settings →
+Pages → Source** to **GitHub Actions** once, and it's automatic after that.
+
+The site URL and base path come from `actions/configure-pages`, so renaming the
+repo or attaching a custom domain needs no code change. Locally the defaults
+live at the top of [`astro.config.mjs`](astro.config.mjs).
+
+---
+
+Built by [Emmanuel Moundhala](https://github.com/Arcullius).

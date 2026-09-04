@@ -1,0 +1,50 @@
+[
+  {
+    "id": "languages",
+    "title": "Languages",
+    "icon": "code",
+    "items": [
+      { "name": "Java", "icon": "java" },
+      { "name": "Python", "icon": "python" },
+      { "name": "C", "icon": "code" },
+      { "name": "JavaScript", "icon": "javascript" },
+      { "name": "TypeScript", "icon": "typescript" },
+      { "name": "HTML/CSS", "icon": "html" },
+      { "name": "SQL", "icon": "database" }
+    ]
+  },
+  {
+    "id": "tools",
+    "title": "Tools & Platforms",
+    "icon": "wrench",
+    "items": [
+      { "name": "Google Cloud Platform", "icon": "cloud" },
+      { "name": "Firebase", "icon": "flame" },
+      { "name": "Supabase", "icon": "database" },
+      { "name": "Git", "icon": "git" },
+      { "name": "VS Code", "icon": "code" },
+      { "name": "Visual Studio", "icon": "window" }
+    ]
+  },
+  {
+    "id": "coursework",
+    "title": "Relevant Coursework",
+    "icon": "book",
+    "items": [
+      { "name": "Data Structures" },
+      { "name": "Algorithms" },
+      { "name": "Machine Learning" },
+      { "name": "Statistics & Discrete Math" },
+      { "name": "Database Concepts" }
+    ]
+  },
+  {
+    "id": "spoken",
+    "title": "Spoken Languages",
+    "icon": "globe",
+    "items": [
+      { "name": "English" },
+      { "name": "French", "note": "Fluent" }
+    ]
+  }
+]

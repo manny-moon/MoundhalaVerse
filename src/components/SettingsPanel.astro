@@ -1,0 +1,258 @@
+---
+import Icon from './Icon.astro';
+
+/**
+ * Scene controls.
+ *
+ * The old build exposed a "perspective" slider that wrote `perspective` onto
+ * `<body>`; at its minimum it put the CSS projection plane exactly where the
+ * modals sat and blew them up to full screen. There is no equivalent control
+ * here — the camera owns framing, and these settings only touch motion.
+ */
+---
+
+<div class="settings">
+  <button
+    type="button"
+    id="settings-toggle"
+    class="settings__toggle"
+    aria-expanded="false"
+    aria-controls="settings-panel"
+    aria-label="Scene settings"
+  >
+    <Icon name="settings" size={19} />
+  </button>
+
+  <div id="settings-panel" class="settings__panel glass" hidden>
+    <section class="settings__section">
+      <h2 class="settings__title">Motion</h2>
+
+      <div class="field">
+        <label for="orbit-speed">
+          <span><Icon name="gauge" size={15} /> Orbit speed</span>
+          <output id="orbit-speed-value" for="orbit-speed">1.0×</output>
+        </label>
+        <input type="range" id="orbit-speed" min="0" max="300" step="10" value="100" />
+      </div>
+
+      <div class="field field--row">
+        <label for="motion-toggle">Animate scene</label>
+        <input type="checkbox" id="motion-toggle" class="switch" checked />
+      </div>
+    </section>
+
+    <section class="settings__section">
+      <h2 class="settings__title"><Icon name="keyboard" size={15} /> Shortcuts</h2>
+      <dl class="keys">
+        <div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Move between planets</dd></div>
+        <div><dt><kbd>Enter</kbd></dt><dd>Open the focused section</dd></div>
+        <div><dt><kbd>Esc</kbd></dt><dd>Close a section</dd></div>
+        <div><dt><kbd>Tab</kbd></dt><dd>Step through the nav rail</dd></div>
+      </dl>
+    </section>
+  </div>
+</div>
+
+<style>
+  .settings {
+    position: fixed;
+    z-index: var(--z-nav);
+    top: max(var(--sp-4), env(safe-area-inset-top));
+    right: max(var(--sp-4), env(safe-area-inset-right));
+  }
+
+  .settings__toggle {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--ink-soft);
+    background: var(--glass);
+    border: 1px solid var(--glass-line);
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(16px);
+    transition:
+      color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease),
+      rotate var(--dur-slow) var(--ease);
+  }
+
+  .settings__toggle:hover,
+  .settings__toggle[aria-expanded='true'] {
+    color: var(--ink);
+    border-color: var(--glass-line-strong);
+    rotate: 60deg;
+  }
+
+  .settings__panel {
+    position: absolute;
+    top: calc(100% + var(--sp-3));
+    right: 0;
+    width: min(20rem, calc(100vw - 2rem));
+    padding: var(--sp-4);
+    display: grid;
+    gap: var(--sp-5);
+    opacity: 0;
+    translate: 0 -6px;
+    transition: opacity var(--dur) var(--ease), translate var(--dur) var(--ease);
+  }
+
+  .settings__panel.is-open {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  .settings__title {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-3);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+  }
+
+  .field {
+    display: grid;
+    gap: var(--sp-2);
+  }
+
+  .field + .field {
+    margin-top: var(--sp-4);
+  }
+
+  .field label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-2);
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+  }
+
+  .field label span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+
+  .field--row {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  output {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-mute);
+  }
+
+  input[type='range'] {
+    width: 100%;
+    height: 1.25rem;
+    appearance: none;
+    background: none;
+    cursor: pointer;
+  }
+
+  input[type='range']::-webkit-slider-runnable-track {
+    height: 3px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(90deg, var(--contact), var(--experience));
+    opacity: 0.55;
+  }
+
+  input[type='range']::-moz-range-track {
+    height: 3px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(90deg, var(--contact), var(--experience));
+    opacity: 0.55;
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    appearance: none;
+    width: 1rem;
+    height: 1rem;
+    margin-top: -0.4rem;
+    border-radius: 50%;
+    background: var(--ink);
+    border: 2px solid var(--void);
+    box-shadow: 0 0 12px rgb(255 255 255 / 0.5);
+  }
+
+  input[type='range']::-moz-range-thumb {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--ink);
+    border: 2px solid var(--void);
+  }
+
+  .switch {
+    appearance: none;
+    position: relative;
+    width: 2.6rem;
+    height: 1.45rem;
+    border-radius: var(--radius-full);
+    background: rgb(255 255 255 / 0.1);
+    border: 1px solid var(--glass-line);
+    cursor: pointer;
+    transition: background var(--dur) var(--ease);
+  }
+
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 0.15rem;
+    left: 0.18rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--ink-mute);
+    transition: translate var(--dur) var(--ease), background var(--dur) var(--ease);
+  }
+
+  .switch:checked {
+    background: color-mix(in srgb, var(--experience) 40%, transparent);
+  }
+
+  .switch:checked::after {
+    translate: 1.1rem 0;
+    background: var(--ink);
+  }
+
+  .keys {
+    display: grid;
+    gap: var(--sp-2);
+  }
+
+  .keys > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    font-size: var(--text-xs);
+    color: var(--ink-mute);
+  }
+
+  .keys dt {
+    display: flex;
+    gap: 0.2rem;
+    flex: none;
+  }
+
+  kbd {
+    display: inline-block;
+    min-width: 1.55rem;
+    padding: 0.1rem 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-align: center;
+    color: var(--ink-soft);
+    background: rgb(255 255 255 / 0.06);
+    border: 1px solid var(--glass-line);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+  }
+</style>
