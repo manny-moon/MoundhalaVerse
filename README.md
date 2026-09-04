@@ -105,4 +105,4 @@ live at the top of [`astro.config.mjs`](astro.config.mjs).
 
 ---
 
-Built by [Emmanuel Moundhala](https://github.com/Arcullius).
+Built by [Emmanuel Moundhala](https://github.com/manny-moon).

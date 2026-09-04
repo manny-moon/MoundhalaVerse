@@ -40,8 +40,8 @@ const description = `Résumé of ${profile.name} — ${profile.title} at ${educa
         <ul class="doc__contact">
           <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li>
           <li><a href={`tel:${profile.phone.replace(/\D/g, '')}`}>{profile.phone}</a></li>
-          <li><a href={profile.links.linkedin} rel="noopener">linkedin.com/in/emmanuel-moundhala</a></li>
-          <li><a href={profile.links.github} rel="noopener">github.com/Arcullius</a></li>
+          <li><a href={profile.links.linkedin} rel="noopener">{profile.links.linkedin.replace('https://www.', '').replace(/\/$/, '')}</a></li>
+          <li><a href={profile.links.github} rel="noopener">{profile.links.github.replace('https://', '')}</a></li>
           <li>{profile.location}</li>
         </ul>
       </header>

@@ -17,7 +17,7 @@ export const profile = {
   avatar: '/images/manny.jpg',
   sunTexture: '/images/manny.png',
   links: {
-    github: 'https://github.com/Arcullius',
+    github: 'https://github.com/manny-moon',
     linkedin: 'https://www.linkedin.com/in/emmanuel-moundhala/',
   },
 } as const;
