@@ -11,7 +11,7 @@ import { Starfield, Nebula } from './objects/space';
 import { detectQuality, prefersReducedMotion } from './quality';
 import type { QualityProfile, SolarSystemOptions } from './types';
 
-const INTRO_DURATION = 4.4;
+const INTRO_DURATION = 6.4;
 
 /**
  * The scene owner. Public surface is deliberately small: construct it, call
