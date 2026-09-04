@@ -4,8 +4,8 @@ My portfolio, built as a real-time WebGL solar system. Five planets orbit a
 procedurally-shaded star; clicking one flies the camera in and opens that
 section of my work.
 
-**Live:** https://arcullius.github.io/MannyPort
-**Plain-text résumé:** https://arcullius.github.io/MannyPort/resume
+**Live:** https://manny-moon.github.io/MoundhalaVerse
+**Plain-text résumé:** https://manny-moon.github.io/MoundhalaVerse/resume
 
 ---
 
@@ -26,7 +26,7 @@ custom properties in [`src/styles/tokens.css`](src/styles/tokens.css).
 
 ```bash
 npm install
-npm run dev      # http://localhost:4321/MannyPort
+npm run dev      # http://localhost:4321/MoundhalaVerse
 npm run build    # type-checks, validates content, writes dist/
 npm run preview  # serve the production build
 ```
@@ -92,8 +92,12 @@ a static backdrop takes its place — no content depends on it.
 ## Deploying
 
 Pushing to `master` triggers [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml),
-which type-checks, builds and publishes to GitHub Pages. Set **Settings →
-Pages → Source** to **GitHub Actions** once, and it's automatic after that.
+which type-checks, builds and publishes to GitHub Pages.
+
+**This repo's Pages is still on the legacy "deploy from a branch" source.** It
+has to be switched to **Settings → Pages → Source → GitHub Actions** before
+merging, otherwise Pages keeps serving the repo root — which no longer holds a
+built `index.html`.
 
 The site URL and base path come from `actions/configure-pages`, so renaming the
 repo or attaching a custom domain needs no code change. Locally the defaults

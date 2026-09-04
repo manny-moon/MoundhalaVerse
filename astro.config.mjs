@@ -2,11 +2,15 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 
-// Deployed to GitHub Pages as a *project* site: arcullius.github.io/MannyPort
-// If you later point a custom domain at this, set SITE to that origin and
-// BASE to '/' — everything else in the codebase reads these two values.
-const SITE = process.env.SITE_URL ?? 'https://arcullius.github.io';
-const BASE = process.env.BASE_PATH ?? '/MannyPort';
+// Deployed to GitHub Pages as a *project* site:
+// manny-moon.github.io/MoundhalaVerse
+//
+// These are only the local defaults — CI overrides both from
+// actions/configure-pages, so renaming the repo or attaching a custom domain
+// needs no change here. For a custom domain set SITE to that origin and
+// BASE to '/'; everything else in the codebase reads these two values.
+const SITE = process.env.SITE_URL ?? 'https://manny-moon.github.io';
+const BASE = process.env.BASE_PATH ?? '/MoundhalaVerse';
 
 export default defineConfig({
   site: SITE,
