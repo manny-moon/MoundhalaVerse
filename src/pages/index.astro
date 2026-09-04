@@ -10,14 +10,47 @@ import Skills from '@components/panels/Skills.astro';
 import Contact from '@components/panels/Contact.astro';
 import { profile, asset } from '@lib/site';
 
-const description = `${profile.name} — ${profile.title}. ${profile.blurb}`;
+const description = `${profile.name}, ${profile.title}. ${profile.blurb}`;
 
 // Split the name per character so each glyph can resolve on its own beat.
 // Grouped by word so the heading still wraps normally on narrow viewports, and
 // the running index keeps the stagger even across the space.
+//
+// Each glyph also gets its own approach vector, so the name assembles out of
+// depth rather than sliding up as one block. A hash rather than Math.random()
+// keeps the markup byte-identical between builds.
+const scatter = (index: number, salt: number): number => {
+  const n = Math.sin((index + 1) * 12.9898 + salt * 78.233) * 43758.5453;
+  return n - Math.floor(n);
+};
+
+/** Hash output remapped to -1..1. */
+const signed = (index: number, salt: number): number => scatter(index, salt) * 2 - 1;
+
 let charIndex = 0;
 const nameWords = profile.name.split(' ').map((word) => {
-  const chars = [...word].map((char) => ({ char, index: charIndex++ }));
+  const chars = [...word].map((char) => {
+    const index = charIndex++;
+    return {
+      char,
+      index,
+      // Where the glyph starts, in its own 3D space. Depth does most of the
+      // work; the lateral offsets project down to a few dozen pixels once
+      // perspective divides them, which is the point - a hint of convergence,
+      // not a scatter that reads as noise.
+      style: [
+        `--i: ${index}`,
+        `--dx: ${(signed(index, 1) * 150).toFixed(1)}px`,
+        `--dy: ${(signed(index, 2) * 130).toFixed(1)}px`,
+        `--spin: ${(signed(index, 3) * 155).toFixed(1)}deg`,
+        `--rx: ${scatter(index, 4).toFixed(2)}`,
+        `--ry: ${scatter(index, 5).toFixed(2)}`,
+        // Mostly left-to-right so it still reads as a sweep, jittered so the
+        // arrivals do not land on a metronome.
+        `--in-delay: ${Math.round(index * 44 + scatter(index, 6) * 90)}ms`,
+      ].join('; '),
+    };
+  });
   charIndex += 1; // account for the space so timing stays uniform
   return chars;
 });
@@ -46,8 +79,8 @@ const nameLength = charIndex;
             <>
               {w > 0 && ' '}
               <span class="intro__word" aria-hidden="true">
-                {word.map(({ char, index }) => (
-                  <span class="intro__char" style={`--i: ${index}`}>{char}</span>
+                {word.map(({ char, style }) => (
+                  <span class="intro__char" style={style}>{char}</span>
                 ))}
               </span>
             </>
@@ -193,7 +226,7 @@ const nameLength = charIndex;
 
     /* Contains the buttons' flight paths.
        A transformed box still contributes its bounding box to the page's
-       scrollable overflow, and the flights start off-screen — below the fold
+       scrollable overflow, and the flights start off-screen, below the fold
        for the launch curve. That grew the scroll area mid-animation, popped a
        vertical scrollbar, and the scrollbar appearing resized the viewport,
        which read as the page shaking.
@@ -208,7 +241,7 @@ const nameLength = charIndex;
     pointer-events: none;
   }
 
-  /* Only interactive children take pointer events — the rest of the HUD lets
+  /* Only interactive children take pointer events; the rest of the HUD lets
      clicks fall through to the canvas so the scene stays draggable. */
   .hud :global(a),
   .hud :global(button) {
@@ -247,7 +280,7 @@ const nameLength = charIndex;
 
   /* `background-clip: text` can't be used here. The characters have to be
      inline-block to accept a transform, which makes each one an atomic inline
-     whose glyphs are no longer part of the <h1>'s own text run — so the
+     whose glyphs are no longer part of the <h1>'s own text run, so the
      clipped gradient never paints into them and the name renders invisible.
      Each character samples the ramp itself instead, which survives transforms
      and gives the same left-to-right warm-to-cool sweep. */
@@ -255,10 +288,18 @@ const nameLength = charIndex;
     font-size: var(--text-3xl);
     line-height: 1.02;
     color: #fff5e2;
+    /* The vanishing point the glyphs arrive through. Scoped to the heading so
+       nothing else inherits a 3D context - nesting UI inside one is what made
+       the old build's modals scale unpredictably. */
+    perspective: 720px;
+    perspective-origin: 32% 45%;
   }
 
+  /* Perspective only reaches direct children and the glyphs sit a level deeper
+     inside their word, so the word has to pass the 3D context down. */
   .intro__word {
     display: inline-block;
+    transform-style: preserve-3d;
   }
 
   .intro__char {
@@ -267,23 +308,87 @@ const nameLength = charIndex;
     --t: calc(var(--i) / var(--n));
     color: color-mix(in oklab, #fff5e2, #9fc8ff calc(var(--t) * 88%));
     opacity: 0;
-    /* Only opacity and transform animate, both compositor-friendly. */
+    /* Only opacity and transform animate here, both compositor-friendly. */
     will-change: transform, opacity;
   }
 
+  /* Two passes over the same glyph. They animate disjoint properties, so they
+     coexist instead of the second clobbering the first. */
   body[data-stage='ready'] .intro__char {
-    animation: charIn 900ms var(--ease-out) forwards;
-    animation-delay: calc(var(--i) * 52ms);
+    animation:
+      charIn 1150ms linear var(--in-delay) both,
+      charFlare 640ms ease-out calc(2050ms + var(--i) * 38ms) both;
   }
 
+  /* Depth carries the entrance: each glyph starts 1400px back, which
+     perspective renders at roughly 34% scale, and rushes forward onto its
+     line. The lateral offset and spin unwind on the way in.
+
+     `linear` with the easing carried by the keyframe spacing. Roughly half the
+     approach is spent in the first fifth of the timeline, so it arrives fast
+     and settles slowly. An eased timing function is applied between *every*
+     pair of keyframes, which at this density would stall eight times over. */
   @keyframes charIn {
-    from {
+    0% {
       opacity: 0;
-      transform: translateY(0.5em) rotate(9deg) scale(0.88);
+      transform: translate3d(var(--dx), var(--dy), -1400px)
+        rotate3d(var(--rx), var(--ry), 1, var(--spin));
     }
-    to {
+    10% {
+      transform: translate3d(calc(var(--dx) * 0.69), calc(var(--dy) * 0.69), -966px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.69));
+    }
+    /* Visible well before it arrives, so the approach itself is the show. */
+    18% {
+      opacity: 1;
+    }
+    20% {
+      transform: translate3d(calc(var(--dx) * 0.458), calc(var(--dy) * 0.458), -641px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.458));
+    }
+    32% {
+      transform: translate3d(calc(var(--dx) * 0.258), calc(var(--dy) * 0.258), -361px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.258));
+    }
+    46% {
+      transform: translate3d(calc(var(--dx) * 0.116), calc(var(--dy) * 0.116), -150px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.116));
+    }
+    /* A shallow overshoot past the plane, so the glyph lands rather than
+       simply stopping. */
+    58% {
+      transform: translate3d(calc(var(--dx) * 0.048), calc(var(--dy) * 0.048), 38px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.048));
+    }
+    72% {
+      transform: translate3d(calc(var(--dx) * 0.016), calc(var(--dy) * 0.016), 16px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.016));
+    }
+    86% {
+      transform: translate3d(calc(var(--dx) * 0.004), calc(var(--dy) * 0.004), -4px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.004));
+    }
+    100% {
       opacity: 1;
       transform: none;
+    }
+  }
+
+  /* A wave of light running left to right once the name is whole. Starts from
+     and returns to the glyph's own place on the warm-to-cool ramp, so the
+     resting name is untouched. Transparent rather than `none` at the ends,
+     which gives the shadow something to interpolate against. */
+  @keyframes charFlare {
+    0%,
+    100% {
+      color: color-mix(in oklab, #fff5e2, #9fc8ff calc(var(--t) * 88%));
+      text-shadow: 0 0 0 rgb(159 200 255 / 0);
+    }
+    40% {
+      color: #ffffff;
+      text-shadow:
+        0 0 16px rgb(190 220 255 / 0.9),
+        0 0 42px rgb(120 170 255 / 0.5);
     }
   }
 
@@ -373,13 +478,13 @@ const nameLength = charIndex;
 
   /*
      The buttons rest on the left of the hero, so they fly in from the right
-     across the full width — a left-to-right approach would spend most of its
+     across the full width. A left-to-right approach would spend most of its
      travel off-screen.
 
      These are transform keyframes rather than `offset-path`. Motion path
      positions the element's anchor relative to its containing block, not its
      natural spot, so the buttons settled tens of pixels off their layout
-     position — the first one ended up off the left edge entirely. Waypoints
+     position, and the first one ended up off the left edge entirely. Waypoints
      land at `transform: none`, which is the resting position by definition.
      Rotation is authored per keyframe to bank each button into its curve.
   */
@@ -420,7 +525,7 @@ const nameLength = charIndex;
   }
 
   body[data-stage='ready'] .intro__actions > * {
-    /* linear on purpose — the keyframe spacing carries the easing. An eased
+    /* linear on purpose; the keyframe spacing carries the easing. An eased
        timing function is applied between *every* keyframe pair, so with
        waypoints this dense it would slow and re-accelerate 16 times over. */
     animation: var(--fly-name) var(--fly-dur) linear var(--fly-delay) forwards;
@@ -448,7 +553,7 @@ const nameLength = charIndex;
     100%    { opacity: 0;   scale: 1.5; }
   }
 
-  /* 1 — enters high on the right and sweeps down across the hero. */
+  /* 1. Enters high on the right and sweeps down across the hero. */
   .intro__actions > *:nth-child(1) {
     --trail: var(--sun);
     --fly-name: flySweep;
@@ -492,7 +597,7 @@ const nameLength = charIndex;
     100%   { opacity: 1; transform: none; }
   }
 
-  /* 2 — a shooting star climbing in from the lower right. */
+  /* 2. A shooting star climbing in from the lower right. */
   .intro__actions > *:nth-child(2) {
     --trail: #bfe4ff;
     --fly-name: flyStar;
@@ -536,7 +641,7 @@ const nameLength = charIndex;
     100%   { opacity: 1; transform: none; }
   }
 
-  /* 3 — the long one: weaves down, back up, then settles. */
+  /* 3. The long one: weaves down, back up, then settles. */
   .intro__actions > *:nth-child(3) {
     --trail: var(--skills);
     --fly-name: flyWeave;
