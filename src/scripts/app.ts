@@ -80,7 +80,10 @@ export function boot(config: BootConfig): void {
     // Safety net: the render loop is paused while the tab is hidden, so the
     // arrival callback can be arbitrarily late. Never strand the panel behind
     // an animation that may not be running.
-    pendingTimer = window.setTimeout(reveal, 2200);
+    //
+    // Must clear the longest approach in the camera rig's catalogue, or this
+    // fires mid-flight and opens the panel before the camera has landed.
+    pendingTimer = window.setTimeout(reveal, 3600);
 
     system.focus(id, reveal);
   }
