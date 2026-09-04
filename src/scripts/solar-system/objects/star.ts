@@ -73,7 +73,7 @@ export class Star {
         this.surface.uniforms.uHasPortrait.value = 1;
       },
       undefined,
-      // A missing portrait is cosmetic — the star still renders.
+      // A missing portrait is cosmetic; the star still renders.
       () => {}
     );
   }

@@ -2,7 +2,7 @@
  * Shared GLSL noise routines.
  *
  * 3D simplex noise after Ashima Arts / Stefan Gustavson (MIT). Every surface in
- * the scene is generated from this rather than from texture files — it keeps the
+ * the scene is generated from this rather than from texture files, which keeps the
  * bundle free of image assets and lets each planet be seeded differently.
  */
 export const NOISE_GLSL = /* glsl */ `
@@ -68,7 +68,7 @@ float snoise(vec3 v) {
   return 42.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
 }
 
-/** Fractal Brownian motion — stacked octaves of simplex noise. */
+/** Fractal Brownian motion: stacked octaves of simplex noise. */
 float fbm(vec3 p, int octaves, float lacunarity, float gain) {
   float sum = 0.0;
   float amp = 0.5;
@@ -82,7 +82,7 @@ float fbm(vec3 p, int octaves, float lacunarity, float gain) {
   return sum;
 }
 
-/** Ridged noise — sharp crests, good for mountains and gas-band edges. */
+/** Ridged noise: sharp crests, good for mountains and gas-band edges. */
 float ridged(vec3 p, int octaves, float lacunarity, float gain) {
   float sum = 0.0;
   float amp = 0.5;
@@ -97,7 +97,7 @@ float ridged(vec3 p, int octaves, float lacunarity, float gain) {
   return sum;
 }
 
-/** Domain-warped fbm — the swirls that make gas giants read as fluid. */
+/** Domain-warped fbm: the swirls that make gas giants read as fluid. */
 float warpedFbm(vec3 p, float warpStrength, int octaves) {
   vec3 q = vec3(
     fbm(p + vec3(0.0, 0.0, 0.0), 4, 2.0, 0.5),

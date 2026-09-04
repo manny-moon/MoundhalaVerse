@@ -5,8 +5,6 @@ export type RigState = 'intro' | 'idle' | 'focusing' | 'focused' | 'returning';
 const easeInOutCubic = (t: number): number =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-const easeOutExpo = (t: number): number => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
-
 /** Flat at both ends, so blending with it introduces no acceleration step. */
 const smoothstep = (t: number): number => t * t * (3 - 2 * t);
 
@@ -273,7 +271,7 @@ export class CameraRig {
     this.idleTarget(this.target, 1);
 
     // Set outright rather than easing toward it. The drift is smooth and the
-    // parallax is already damped, so a second filter only adds lag — and lag
+    // parallax is already damped, so a second filter only adds lag, and lag
     // that appears the instant idle takes over reads as a hitch.
     this.camera.position.copy(this.target);
     this.lookAt.copy(this.origin);

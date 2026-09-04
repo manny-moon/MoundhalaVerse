@@ -121,7 +121,7 @@ export class SolarSystem {
 
     // Build every shader program up front. Otherwise the first frame that
     // brings a new material on screen compiles it mid-flight, and the whole
-    // main thread stalls for tens of milliseconds — which is exactly what made
+    // main thread stalls for tens of milliseconds, which is exactly what made
     // the entrance stutter.
     this.renderer.compile(this.scene, this.rig.camera);
 

@@ -2,13 +2,13 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Icon from '@components/Icon.astro';
-import { profile, education, about, asset, formatRange } from '@lib/site';
+import { profile, education, about, asset, formatMonth, formatRange } from '@lib/site';
 
 /**
  * The plain route.
  *
  * Real text, crawlable, linkable, and printable. The solar system is a fun way
- * in — it should never be the only way in.
+ * in, but it should never be the only way in.
  */
 
 const experienceEntries = await getCollection('experience');
@@ -21,7 +21,7 @@ const skillGroups = await getCollection('skills');
 const ORDER = ['languages', 'tools', 'coursework', 'spoken'];
 const skills = skillGroups.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
 
-const description = `Résumé of ${profile.name} — ${profile.title} at ${education.school}, graduating ${formatRange(education.start, education.end).split('—')[1]?.trim()}.`;
+const description = `Résumé of ${profile.name}, ${profile.title} at ${education.school}, graduating ${formatMonth(education.end)}.`;
 ---
 
 <BaseLayout title={`Résumé · ${profile.name}`} description={description} plain>
@@ -130,8 +130,8 @@ const description = `Résumé of ${profile.name} — ${profile.title} at ${educa
           <Icon name="download" size={15} /> Download the PDF
         </a>
         <p class="doc__note">
-          This page and the PDF are generated from the same content files, so they can't
-          disagree with each other.
+          The PDF is the one-page version, the one worth handing over. This page carries the
+          same history with more room to explain it.
         </p>
       </footer>
     </main>

@@ -116,7 +116,7 @@ ul, ol { padding: 0; list-style: none; }
 
 .skip-link:focus { transform: translateY(0); }
 
-/* Frosted panel — the base surface for every piece of UI chrome */
+/* Frosted panel: the base surface for every piece of UI chrome */
 .glass {
   background: var(--glass);
   border: 1px solid var(--glass-line);
@@ -146,7 +146,7 @@ ul, ol { padding: 0; list-style: none; }
   background-clip: content-box;
 }
 
-/* Shared pill — used for tags, stack chips, interests */
+/* Shared pill: used for tags, stack chips, interests */
 .pill {
   display: inline-flex;
   align-items: center;

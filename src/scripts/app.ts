@@ -99,7 +99,7 @@ export function boot(config: BootConfig): void {
   // timings here, it listens for the last element in the choreography to
   // finish animating, so the stylesheet stays the single source of truth.
 
-  /** Leading phrases that always play in order — the greeting. */
+  /** Leading phrases that always play in order, the greeting. */
   const ORDERED_PREFIX = 2;
 
   const title = $('#headline');
@@ -123,8 +123,8 @@ export function boot(config: BootConfig): void {
         typewriter.start();
       };
 
-      // `.settings` is the last thing to arrive. If it never animates — no
-      // such element, or the entrance was skipped — the timer still fires.
+      // `.settings` is the last thing to arrive. If it never animates, because
+      // there is no such element or the entrance was skipped, the timer still fires.
       const last = $('#settings-toggle')?.closest('.settings') ?? null;
       last?.addEventListener('animationend', beginTyping, { once: true });
       window.setTimeout(beginTyping, 6000);
@@ -189,7 +189,7 @@ export function boot(config: BootConfig): void {
   const hoverLabel = $('#hover-label');
 
   /**
-   * Releases the entrance animations. Every path has to reach this — the copy
+   * Releases the entrance animations. Every path has to reach this, because the copy
    * starts at opacity 0, so failing to call it would leave the page blank.
    * Idempotent, and backed by a timeout below.
    */

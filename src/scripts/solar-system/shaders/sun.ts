@@ -3,7 +3,7 @@ import { NOISE_GLSL } from './noise';
 /**
  * The star at the centre.
  *
- * Surface is procedural plasma — granulation cells over a slower convective
+ * Surface is procedural plasma: granulation cells over a slower convective
  * churn, with brighter faculae along the cell boundaries. Hovering or focusing
  * the star crossfades a portrait into the photosphere (`uPortraitMix`), which is
  * the one deliberate piece of whimsy carried over from the first version of
@@ -64,7 +64,7 @@ void main() {
   color = mix(color, hotColor, smoothstep(0.45, 0.75, heat));
   color = mix(color, whiteColor, smoothstep(0.78, 0.96, heat));
 
-  // Faculae — bright filaments along granulation boundaries.
+  // Faculae: bright filaments along granulation boundaries.
   float faculae = smoothstep(0.72, 0.95, granules);
   color += whiteColor * faculae * 0.6;
 
@@ -80,7 +80,7 @@ void main() {
   float limb = pow(1.0 - facing, 2.2);
   color += vec3(1.0, 0.55, 0.18) * limb * 1.35;
 
-  // Portrait reveal — the photo is dodged into the plasma, never pasted flat.
+  // Portrait reveal: the photo is dodged into the plasma, never pasted flat.
   if (uHasPortrait > 0.5 && uPortraitMix > 0.001) {
     vec3 portrait = texture2D(uPortrait, vUv).rgb;
     float luma = dot(portrait, vec3(0.299, 0.587, 0.114));
@@ -94,7 +94,7 @@ void main() {
   }
 
   // Enough HDR headroom for bloom to catch, but low enough that ACES doesn't
-  // clip the whole disc to white — the granulation has to stay readable.
+  // clip the whole disc to white; the granulation has to stay readable.
   color *= 1.32 * uReveal;
 
   gl_FragColor = vec4(color, 1.0);

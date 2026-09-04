@@ -101,7 +101,7 @@ vec3 gasSurface(vec3 p, out float rough) {
   vec3 lightBand = mix(uBaseColor, vec3(1.0, 0.96, 0.88), 0.55);
   vec3 col = mix(darkBand, lightBand, bands);
 
-  // A storm — the eye sits off-centre and counter-rotates.
+  // A storm: the eye sits off-centre and counter-rotates.
   vec3 stormCenter = normalize(vec3(0.55, -0.32, 0.75));
   float d = distance(normalize(p), stormCenter);
   float storm = smoothstep(0.34, 0.0, d);
@@ -143,7 +143,7 @@ void main() {
   vec3 L = normalize(uLightPos);
   vec3 V = normalize(vViewDir);
 
-  // Wrapped diffuse — softens the terminator so the night side isn't a hard edge.
+  // Wrapped diffuse: softens the terminator so the night side isn't a hard edge.
   float ndl = dot(N, L);
   float diffuse = clamp((ndl + 0.22) / 1.22, 0.0, 1.0);
   diffuse = pow(diffuse, 1.35);
@@ -152,7 +152,7 @@ void main() {
   vec3 H = normalize(L + V);
   float spec = pow(max(dot(N, H), 0.0), mix(180.0, 12.0, rough)) * (1.0 - rough);
 
-  // Fresnel rim in the planet's own accent — reads as atmosphere at grazing angles.
+  // Fresnel rim in the planet's own accent; reads as atmosphere at grazing angles.
   float fresnel = pow(1.0 - max(dot(N, V), 0.0), 3.0);
 
   vec3 sunTint = vec3(1.0, 0.93, 0.82);
@@ -166,14 +166,14 @@ void main() {
   // Hover: lift the whole body slightly rather than only the rim.
   color *= 1.0 + uHover * 0.18;
 
-  // Entrance wipe — surface resolves from the terminator outward.
+  // Entrance wipe: surface resolves from the terminator outward.
   color *= smoothstep(0.0, 0.35, uReveal);
 
   gl_FragColor = vec4(color, 1.0);
 }
 `;
 
-/** Thin additive shell drawn just outside the planet — the visible atmosphere. */
+/** Thin additive shell drawn just outside the planet: the visible atmosphere. */
 export const ATMOSPHERE_VERTEX = /* glsl */ `
 varying vec3 vNormalW;
 varying vec3 vViewDir;

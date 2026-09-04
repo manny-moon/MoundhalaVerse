@@ -22,7 +22,6 @@ const experience = defineCollection({
     end: monthString.or(z.literal('present')),
     icon: z.string(),
     accent: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-    summary: z.string(),
     highlights: z.array(z.string()).min(1),
     stack: z.array(z.string()).default([]),
   }),

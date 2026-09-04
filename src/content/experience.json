@@ -8,12 +8,11 @@
     "end": "2026-08",
     "icon": "building",
     "accent": "#4ECDC4",
-    "summary": "Second summer on the team — owned infrastructure work end to end and ran the billable backlog solo.",
     "highlights": [
-      "Owned server setup and migration for client environments start to finish, provisioning and configuring resources on Google Cloud Platform and building a repeatable workflow the development team continued using.",
-      "Built and integrated REST APIs connecting client-facing features to backend services, using Firebase for data storage and authentication on select projects.",
-      "Reviewed pull requests and gave code review feedback across the team, catching bugs before release and keeping the codebase consistent with team standards.",
-      "Managed the team's billable backlog independently during a stretch with more priorities than people, keeping deliverables on schedule for utility clients OG&E and PPL."
+      "Provisioned and migrated client server environments on Google Cloud Platform, leaving behind a repeatable workflow the team kept using.",
+      "Built REST APIs connecting client-facing features to backend services, with Firebase for storage and auth.",
+      "Reviewed pull requests across the team, catching bugs before release and holding the codebase to one standard.",
+      "Ran the billable backlog solo through a stretch with more priorities than people, keeping OG&E and PPL on schedule."
     ],
     "stack": ["Google Cloud Platform", "REST APIs", "Firebase", "Code Review"]
   },
@@ -26,12 +25,11 @@
     "end": "2025-08",
     "icon": "building",
     "accent": "#45B7D1",
-    "summary": "First summer — shipped client-facing developer tooling and UI work.",
     "highlights": [
-      "Developed an API resources widget to simplify extensibility tools for clients, including example API calls and an interactive UI for running or copying code with real dynamic output.",
-      "Designed and implemented embedded integration windows with modern, stylized UI components to improve usability.",
-      "Resolved critical software bugs, removing barriers that impacted client workflows and improving overall product reliability.",
-      "Collaborated in weekly Scrum cycles, strengthening agile development, teamwork, and project ownership."
+      "Built an API resources widget with runnable example calls and live output clients could copy into their own code.",
+      "Designed embedded integration windows and the UI components behind them.",
+      "Fixed critical bugs that were blocking client workflows.",
+      "Worked in weekly Scrum cycles with the product team."
     ],
     "stack": ["JavaScript", "REST APIs", "UI Engineering", "Scrum"]
   },
@@ -44,11 +42,10 @@
     "end": "2022-08",
     "icon": "google",
     "accent": "#FF6B6B",
-    "summary": "Computer Science Summer Institute — sprint-based projects with Google engineering teams.",
     "highlights": [
-      "Collaborated with Google engineering teams on weekly sprint projects, primarily using JavaScript frameworks with Node.js.",
-      "Used Firebase for backend and user authentication management, improving codebase management and review.",
-      "Partnered with fellow CSSI interns on end-of-term MVP projects."
+      "Built weekly sprint projects with Google engineering teams in JavaScript and Node.js.",
+      "Used Firebase for the backend and user authentication.",
+      "Shipped an end-of-term MVP with a team of fellow interns."
     ],
     "stack": ["JavaScript", "Node.js", "Firebase"]
   },
@@ -61,10 +58,9 @@
     "end": "2021-08",
     "icon": "code",
     "accent": "#96CEB4",
-    "summary": "Intensive summer bootcamp — where the web development started.",
     "highlights": [
-      "Bootcamp that built foundational skills in JavaScript, HTML, and CSS.",
-      "Finished with a collaborative capstone project using third-party APIs and Firebase."
+      "Summer bootcamp in JavaScript, HTML, and CSS.",
+      "Finished with a team capstone using third-party APIs and Firebase."
     ],
     "stack": ["JavaScript", "HTML/CSS", "Firebase"]
   }

@@ -33,7 +33,7 @@ export const education = {
 export const about = {
   bio: [
     "Originally from Burkina Faso, I moved to the United States when I was six. That move is most of the reason I care about technology that reaches people who usually get built around rather than built for.",
-    'These days that looks like backend and infrastructure work — provisioning cloud environments, wiring up APIs, and reviewing enough pull requests to have opinions about them. I like the parts of engineering where reliability and interface design meet.',
+    'These days that looks like backend and infrastructure work: provisioning cloud environments, wiring up APIs, and reviewing enough pull requests to have opinions about them. I like the parts of engineering where reliability and interface design meet.',
   ],
   interests: [
     'Soccer',
@@ -132,7 +132,7 @@ export function formatMonth(value: string): string {
 }
 
 export function formatRange(start: string, end: string): string {
-  return `${formatMonth(start)} — ${formatMonth(end)}`;
+  return `${formatMonth(start)} to ${formatMonth(end)}`;
 }
 
 /** Prefixes a public-asset path with Astro's configured base path. */
@@ -185,7 +185,6 @@ export const phrases = [
   'Every planet here is a section',
   'Written in TypeScript, rendered in GLSL',
   'Ship it, then make it better',
-  'Still compiling',
 
   // Space, because it is still a solar system
   'Every star you see is in the past',

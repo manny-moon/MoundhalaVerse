@@ -5,7 +5,7 @@ import Icon from '../Icon.astro';
 import { formatRange } from '@lib/site';
 
 const entries = await getCollection('experience');
-// Newest first — collections don't guarantee file order.
+// Newest first; collections don't guarantee file order.
 const timeline = entries.sort((a, b) => b.data.start.localeCompare(a.data.start));
 ---
 
@@ -36,8 +36,6 @@ const timeline = entries.sort((a, b) => b.data.start.localeCompare(a.data.start)
                 <time datetime={entry.data.start}>{formatRange(entry.data.start, entry.data.end)}</time>
               </p>
             </header>
-
-            <p class="entry__summary">{entry.data.summary}</p>
 
             <ul class="entry__highlights">
               {entry.data.highlights.map((highlight) => (
@@ -145,12 +143,6 @@ const timeline = entries.sort((a, b) => b.data.start.localeCompare(a.data.start)
     font-size: var(--text-xs);
     letter-spacing: 0.03em;
     color: var(--ink-faint);
-  }
-
-  .entry__summary {
-    margin-bottom: var(--sp-3);
-    font-size: var(--text-sm);
-    color: var(--ink-soft);
   }
 
   .entry__highlights {

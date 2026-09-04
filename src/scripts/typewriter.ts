@@ -15,7 +15,7 @@ export interface TypewriterOptions {
   gapMs?: number;
   /**
    * How many leading phrases always play in order, as a greeting. Everything
-   * after them is shuffled, and the greeting is dropped from later passes —
+   * after them is shuffled, and the greeting is dropped from later passes.
    * "Welcome" only means something the first time.
    */
   orderedPrefix?: number;
@@ -37,7 +37,7 @@ export class Typewriter {
   private stopped = false;
   /**
    * Identifies the active run loop. Waking from a hidden tab starts a new one,
-   * and without this the previous loop keeps going too — two loops writing the
+   * and without this the previous loop keeps going too: two loops writing the
    * same element and both advancing the cursor, which scrambles the order.
    */
   private runId = 0;

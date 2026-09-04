@@ -3,7 +3,7 @@
  * Inline SVG icons.
  *
  * Replaces the Font Awesome CDN stylesheet the previous build loaded on every
- * page — that was a render-blocking request to a third party for what amounts
+ * page. That was a render-blocking request to a third party for what amounts
  * to about twenty glyphs. These ship in the HTML and cost nothing extra.
  *
  * Stroke-based, 24x24 viewBox, inheriting `currentColor`.
@@ -55,7 +55,7 @@ interface Props {
 
 const { name, size = 20, class: className = '', label } = Astro.props;
 
-/** Path data only — every icon shares the same stroke presentation below. */
+/** Path data only. Every icon shares the same stroke presentation below. */
 const PATHS: Record<string, string> = {
   user: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
   briefcase:

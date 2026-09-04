@@ -80,7 +80,7 @@ ${NOISE_GLSL}
 void main() {
   vec3 dir = normalize(vObjectPos);
 
-  // Very slow drift — perceptible over tens of seconds, never distracting.
+  // Very slow drift: perceptible over tens of seconds, never distracting.
   vec3 p = dir * 1.6 + vec3(0.0, uTime * 0.004, 0.0);
 
   float cloud = warpedFbm(p, 2.4, 5) * 0.5 + 0.5;
