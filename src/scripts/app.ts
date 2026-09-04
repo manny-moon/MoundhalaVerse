@@ -1,3 +1,4 @@
+import { isActive, onActivityChange, whenActive } from './activity';
 import { ModalController } from './modals';
 import { Typewriter } from './typewriter';
 import { supportsWebGL, prefersReducedMotion } from './solar-system/quality';
@@ -18,6 +19,19 @@ export function boot(config: BootConfig): void {
   if (!scrim) return;
 
   let system: SolarSystem | null = null;
+
+  // --- Idle -----------------------------------------------------------------
+  //
+  // One flag drives every CSS animation on the page, so the entrance, the
+  // orbiting rail dot and the caret all hold together while the reader is in
+  // another window. The scene loop and the typewriter watch the same signal
+  // themselves; this only covers what CSS owns.
+  const markActivity = (active: boolean): void => {
+    if (active) delete document.body.dataset.active;
+    else document.body.dataset.active = 'false';
+  };
+  markActivity(isActive());
+  onActivityChange(markActivity);
 
   // --- Navigation -----------------------------------------------------------
   //
@@ -127,7 +141,10 @@ export function boot(config: BootConfig): void {
       // there is no such element or the entrance was skipped, the timer still fires.
       const last = $('#settings-toggle')?.closest('.settings') ?? null;
       last?.addEventListener('animationend', beginTyping, { once: true });
-      window.setTimeout(beginTyping, 6000);
+      // Paused animations never reach `animationend`, but a timer does not
+      // pause. Without the activity gate a blurred page would start typing
+      // behind an entrance that is still frozen mid-flight.
+      window.setTimeout(() => whenActive(beginTyping), 6000);
     }
   }
 

@@ -7,6 +7,8 @@
  * caret from the text on every viewport that wasn't desktop-width.
  */
 
+import { isActive, onActivityChange } from './activity';
+
 export interface TypewriterOptions {
   phrases: readonly string[];
   typeMs?: number;
@@ -36,11 +38,12 @@ export class Typewriter {
   private timer = 0;
   private stopped = false;
   /**
-   * Identifies the active run loop. Waking from a hidden tab starts a new one,
+   * Identifies the active run loop. Returning to the page starts a new one,
    * and without this the previous loop keeps going too: two loops writing the
    * same element and both advancing the cursor, which scrambles the order.
    */
   private runId = 0;
+  private releaseActivity: (() => void) | null = null;
 
   constructor(el: HTMLElement, options: TypewriterOptions) {
     this.el = el;
@@ -79,7 +82,7 @@ export class Typewriter {
   start(): void {
     if (this.phrases.length === 0) return;
     this.stopped = false;
-    document.addEventListener('visibilitychange', this.onVisibility);
+    this.releaseActivity ??= onActivityChange(this.onActivity);
     this.runId += 1;
     void this.run(this.runId);
   }
@@ -87,12 +90,14 @@ export class Typewriter {
   stop(): void {
     this.stopped = true;
     this.retire();
-    document.removeEventListener('visibilitychange', this.onVisibility);
+    this.releaseActivity?.();
+    this.releaseActivity = null;
   }
 
-  private onVisibility = (): void => {
-    // Nothing to animate off-screen; the loop re-checks on wake.
-    if (document.hidden) {
+  private onActivity = (active: boolean): void => {
+    // Nobody is reading a window they are not looking at; the loop re-checks
+    // on the way back in.
+    if (!active) {
       window.clearTimeout(this.timer);
       return;
     }
@@ -114,9 +119,9 @@ export class Typewriter {
     window.clearTimeout(this.timer);
   }
 
-  /** True while `id` is still the active loop and the page is visible. */
+  /** True while `id` is still the active loop and the page is being read. */
   private alive(id: number): boolean {
-    return !this.stopped && id === this.runId && !document.hidden;
+    return !this.stopped && id === this.runId && isActive();
   }
 
   private async run(id: number): Promise<void> {

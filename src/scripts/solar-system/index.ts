@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { isActive, onActivityChange } from '../activity';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
@@ -41,6 +42,9 @@ export class SolarSystem {
 
   private hoveredId: string | null = null;
   private frameHandle = 0;
+  private releaseActivity: (() => void) | null = null;
+  /** The reader's intent, as opposed to whether frames are running now. */
+  private wantsToRun = false;
   private running = false;
   private disposed = false;
   private reveal = 0;
@@ -129,6 +133,9 @@ export class SolarSystem {
     if (this.reducedMotion) this.reveal = 1;
 
     this.start();
+    // A page opened without focus never enters the loop, and an empty canvas
+    // on someone's second monitor reads as broken. Paint the first frame.
+    if (!this.running) this.composer.render(0);
     options.onReady();
   }
 
@@ -158,15 +165,32 @@ export class SolarSystem {
     this.orbitSpeed = multiplier;
   }
 
+  /**
+   * Runs the scene, and remembers that it should be running.
+   *
+   * Kept separate from `resume` so that going idle and coming back cannot
+   * override the reader: with the motion switch off, a blur and refocus would
+   * otherwise start the scene up again on its own.
+   */
   start(): void {
-    if (this.running || this.disposed) return;
+    this.wantsToRun = true;
+    this.resume();
+  }
+
+  stop(): void {
+    this.wantsToRun = false;
+    this.suspend();
+  }
+
+  private resume(): void {
+    if (this.running || this.disposed || !this.wantsToRun || !isActive()) return;
     this.running = true;
     // Reset the frame stamp so a pause doesn't arrive as one huge delta.
     this.lastFrameMs = performance.now();
     this.loop();
   }
 
-  stop(): void {
+  private suspend(): void {
     this.running = false;
     if (this.frameHandle) cancelAnimationFrame(this.frameHandle);
     this.frameHandle = 0;
@@ -244,7 +268,7 @@ export class SolarSystem {
     this.canvas.addEventListener('pointerleave', this.onPointerLeave, { passive: true });
     this.canvas.addEventListener('pointerdown', this.onPointerDown, { passive: true });
     this.canvas.addEventListener('pointerup', this.onPointerUp, { passive: true });
-    document.addEventListener('visibilitychange', this.onVisibilityChange);
+    this.releaseActivity = onActivityChange(this.onActivityChange);
     this.renderer.domElement.addEventListener('webglcontextlost', this.onContextLost);
 
     if (typeof ResizeObserver !== 'undefined' && this.canvas.parentElement) {
@@ -255,9 +279,12 @@ export class SolarSystem {
     }
   }
 
-  private onVisibilityChange = (): void => {
-    if (document.hidden) this.stop();
-    else this.start();
+  // Visible but unfocused still meant a full-rate render loop before this.
+  // Goes through resume/suspend, so it never revives a scene the reader
+  // switched off.
+  private onActivityChange = (active: boolean): void => {
+    if (active) this.resume();
+    else this.suspend();
   };
 
   private onContextLost = (event: Event): void => {
@@ -367,7 +394,7 @@ export class SolarSystem {
     this.canvas.removeEventListener('pointerleave', this.onPointerLeave);
     this.canvas.removeEventListener('pointerdown', this.onPointerDown);
     this.canvas.removeEventListener('pointerup', this.onPointerUp);
-    document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    this.releaseActivity?.();
     this.renderer.domElement.removeEventListener('webglcontextlost', this.onContextLost);
     this.resizeObserver?.disconnect();
     window.removeEventListener('resize', this.resize);
