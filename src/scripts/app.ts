@@ -91,12 +91,41 @@ export function boot(config: BootConfig): void {
   }
 
   // --- Headline -------------------------------------------------------------
+  //
+  // Typing waits for the entrance to finish. Rather than duplicating the CSS
+  // timings here, it listens for the last element in the choreography to
+  // finish animating, so the stylesheet stays the single source of truth.
+
+  /** Leading phrases that always play in order — the greeting. */
+  const ORDERED_PREFIX = 2;
 
   const title = $('#headline');
   if (title) {
-    const typewriter = new Typewriter(title, { phrases: config.phrases });
-    if (prefersReducedMotion()) typewriter.renderStatic();
-    else typewriter.start();
+    const typewriter = new Typewriter(title, {
+      phrases: config.phrases,
+      orderedPrefix: ORDERED_PREFIX,
+    });
+
+    if (prefersReducedMotion()) {
+      typewriter.renderStatic();
+    } else {
+      // Blank the server-rendered text so the caret waits on an empty line
+      // instead of showing the greeting and then retyping it.
+      typewriter.clear();
+
+      let started = false;
+      const beginTyping = (): void => {
+        if (started) return;
+        started = true;
+        typewriter.start();
+      };
+
+      // `.settings` is the last thing to arrive. If it never animates — no
+      // such element, or the entrance was skipped — the timer still fires.
+      const last = $('#settings-toggle')?.closest('.settings') ?? null;
+      last?.addEventListener('animationend', beginTyping, { once: true });
+      window.setTimeout(beginTyping, 6000);
+    }
   }
 
   // --- Settings -------------------------------------------------------------

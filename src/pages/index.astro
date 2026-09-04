@@ -56,7 +56,7 @@ const nameLength = charIndex;
       </h1>
 
       <p class="intro__headline">
-        <span id="headline" class="headline" aria-live="off">The Moundhalaverse</span>
+        <span id="headline" class="headline" aria-live="off">Welcome to the Moundhalaverse</span>
       </p>
 
       <p class="visually-hidden">
@@ -190,6 +190,16 @@ const nameLength = charIndex;
     display: flex;
     align-items: center;
     min-height: 100svh;
+
+    /* Contains the buttons' flight paths.
+       A transformed box still contributes its bounding box to the page's
+       scrollable overflow, and the flights start off-screen — below the fold
+       for the launch curve. That grew the scroll area mid-animation, popped a
+       vertical scrollbar, and the scrollbar appearing resized the viewport,
+       which read as the page shaking.
+       `clip` contains it without creating a scroll container of its own, and
+       nothing is lost visually because the clip edge is the viewport edge. */
+    overflow: clip;
     padding:
       max(var(--sp-6), env(safe-area-inset-top))
       max(var(--sp-6), env(safe-area-inset-right))
@@ -211,52 +221,42 @@ const nameLength = charIndex;
     gap: var(--sp-4);
   }
 
-  /* Entrance choreography.
-     Each element holds its `from` state via `backwards` fill, so nothing
-     flashes before its beat. Timings run against the camera's 2.1s intro
-     dolly so the copy and the scene resolve together. */
-  .intro__eyebrow,
-  .intro__headline,
-  .intro__blurb,
-  .intro__actions > * {
-    opacity: 0;
+  .intro__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    color: var(--ink-mute);
   }
 
-  /* Nothing starts until the scene has compiled its shaders and reported
-     ready. Running this against a thread that is busy building WebGL pipelines
-     is what made the entrance stutter. */
-  body[data-stage='ready'] :is(
-    .intro__eyebrow,
-    .intro__headline,
-    .intro__blurb,
-    .intro__actions > *
-  ) {
-    animation: rise 1000ms var(--ease-out) forwards;
+  .intro__pulse {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--experience);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--experience) 70%, transparent);
+    animation: pulse 2.4s ease-out infinite;
   }
 
-  body[data-stage='ready'] .intro__eyebrow  { animation-delay: 120ms; }
-  body[data-stage='ready'] .intro__headline { animation-delay: 1450ms; }
-  body[data-stage='ready'] .intro__blurb    { animation-delay: 1700ms; }
-
-  body[data-stage='ready'] .intro__actions > *:nth-child(1) { animation-delay: 1950ms; }
-  body[data-stage='ready'] .intro__actions > *:nth-child(2) { animation-delay: 2080ms; }
-  body[data-stage='ready'] .intro__actions > *:nth-child(3) { animation-delay: 2210ms; }
-
-  /* Transform and opacity only - no filter. Animating blur forces a full
-     repaint every frame, which is what made this choppy alongside the scene. */
-  @keyframes rise {
-    from {
-      opacity: 0;
-      transform: translateY(18px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
+  @keyframes pulse {
+    70%  { box-shadow: 0 0 0 0.6rem transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
   }
 
-  /* The name resolves glyph by glyph. The gradient stays on the <h1> so the
-     fill sweeps across the whole name rather than repeating per letter. */
+  /* `background-clip: text` can't be used here. The characters have to be
+     inline-block to accept a transform, which makes each one an atomic inline
+     whose glyphs are no longer part of the <h1>'s own text run — so the
+     clipped gradient never paints into them and the name renders invisible.
+     Each character samples the ramp itself instead, which survives transforms
+     and gives the same left-to-right warm-to-cool sweep. */
+  .intro__name {
+    font-size: var(--text-3xl);
+    line-height: 1.02;
+    color: #fff5e2;
+  }
+
   .intro__word {
     display: inline-block;
   }
@@ -285,42 +285,6 @@ const nameLength = charIndex;
       opacity: 1;
       transform: none;
     }
-  }
-
-  .intro__eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-2);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: 0.06em;
-    color: var(--ink-mute);
-  }
-
-  .intro__pulse {
-    width: 0.45rem;
-    height: 0.45rem;
-    border-radius: 50%;
-    background: var(--experience);
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--experience) 70%, transparent);
-    animation: pulse 2.4s ease-out infinite;
-  }
-
-  @keyframes pulse {
-    70% { box-shadow: 0 0 0 0.6rem transparent; }
-    100% { box-shadow: 0 0 0 0 transparent; }
-  }
-
-  /* `background-clip: text` can't be used here. The characters have to be
-     inline-block to accept a transform, which makes each one an atomic inline
-     whose glyphs are no longer part of the <h1>'s own text run — so the
-     clipped gradient never paints into them and the name renders invisible.
-     Each character samples the ramp itself instead, which survives transforms
-     and gives the same left-to-right warm-to-cool sweep. */
-  .intro__name {
-    font-size: var(--text-3xl);
-    line-height: 1.02;
-    color: #fff5e2;
   }
 
   .intro__headline {
@@ -360,6 +324,212 @@ const nameLength = charIndex;
     flex-wrap: wrap;
     gap: var(--sp-2);
     margin-top: var(--sp-2);
+  }
+
+  /* Transform and opacity only - no filter. Animating blur forces a full
+     repaint every frame, which is what made this choppy alongside the scene. */
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Entrance choreography. Timings run against the camera's intro dolly so
+     the copy and the scene resolve together. */
+  .intro__eyebrow,
+  .intro__headline,
+  .intro__blurb,
+  .intro__actions > * {
+    opacity: 0;
+  }
+
+  /* Nothing starts until the scene has compiled its shaders and reported
+     ready. Running this against a thread that is busy building WebGL pipelines
+     is what made the entrance stutter. */
+  body[data-stage='ready'] :is(
+    .intro__eyebrow,
+    .intro__headline,
+    .intro__blurb
+  ) {
+    animation: rise 1000ms var(--ease-out) forwards;
+  }
+
+  body[data-stage='ready'] .intro__eyebrow  { animation-delay: 120ms; }
+  body[data-stage='ready'] .intro__headline { animation-delay: 1450ms; }
+  body[data-stage='ready'] .intro__blurb    { animation-delay: 1700ms; }
+
+  /* --- The three calls to action fly in ----------------------------------- */
+
+  .intro__actions > * {
+    position: relative;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  /*
+     The buttons rest on the left of the hero, so they fly in from the right
+     across the full width — a left-to-right approach would spend most of its
+     travel off-screen.
+
+     These are transform keyframes rather than `offset-path`. Motion path
+     positions the element's anchor relative to its containing block, not its
+     natural spot, so the buttons settled tens of pixels off their layout
+     position — the first one ended up off the left edge entirely. Waypoints
+     land at `transform: none`, which is the resting position by definition.
+     Rotation is authored per keyframe to bank each button into its curve.
+  */
+
+  /* The exhaust trail, hanging off the trailing (right) edge. It inherits the
+     parent's bank, so it stays pointed back down the flight path. */
+  .intro__actions > *::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    width: 320px;
+    height: 5px;
+    margin: -2.5px 0 0 -10px;
+    border-radius: var(--radius-full);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    background: linear-gradient(
+      to right,
+      var(--trail),
+      color-mix(in srgb, var(--trail) 55%, transparent) 30%,
+      color-mix(in srgb, var(--trail) 15%, transparent) 62%,
+      transparent 94%
+    );
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Impact ring, timed to the moment it settles. */
+  .intro__actions > *::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--trail);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  body[data-stage='ready'] .intro__actions > * {
+    /* linear on purpose — the keyframe spacing carries the easing. An eased
+       timing function is applied between *every* keyframe pair, so with
+       waypoints this dense it would slow and re-accelerate 16 times over. */
+    animation: var(--fly-name) var(--fly-dur) linear var(--fly-delay) forwards;
+  }
+
+  body[data-stage='ready'] .intro__actions > *::before {
+    animation: trail var(--fly-dur) var(--ease-out) var(--fly-delay) forwards;
+  }
+
+  body[data-stage='ready'] .intro__actions > *::after {
+    animation: impact var(--fly-dur) linear var(--fly-delay) forwards;
+  }
+
+  @keyframes trail {
+    0%   { opacity: 0;    transform: scaleX(0.05); }
+    14%  { opacity: 1;    transform: scaleX(1); }
+    55%  { opacity: 0.75; transform: scaleX(0.72); }
+    82%  { opacity: 0.25; transform: scaleX(0.28); }
+    100% { opacity: 0;    transform: scaleX(0); }
+  }
+
+  @keyframes impact {
+    0%, 74% { opacity: 0;    scale: 0.85; }
+    82%     { opacity: 0.85; scale: 1; }
+    100%    { opacity: 0;    scale: 1.55; }
+  }
+
+  /* 1 — enters high on the right and sweeps down across the hero. */
+  .intro__actions > *:nth-child(1) {
+    --trail: var(--sun);
+    --fly-name: flySweep;
+    --fly-dur: 1500ms;
+    --fly-delay: 1900ms;
+  }
+
+  @keyframes flySweep {
+    0%    { opacity: 0; transform: translate(940px, -250px) rotate(3.1deg) scale(0.320); }
+    6.2%  { opacity: 1; transform: translate(799px, -227px) rotate(6.0deg) scale(0.418); }
+    12.5% { transform: translate(667px, -194px) rotate(7.7deg) scale(0.506); }
+    18.8% { transform: translate(548px, -159px) rotate(8.6deg) scale(0.587); }
+    25%   { transform: translate(441px, -125px) rotate(9.0deg) scale(0.659); }
+    31.2% { transform: translate(349px, -95px) rotate(9.1deg) scale(0.723); }
+    37.5% { transform: translate(270px, -69px) rotate(8.8deg) scale(0.780); }
+    43.8% { transform: translate(204px, -49px) rotate(8.4deg) scale(0.829); }
+    50%   { transform: translate(150px, -33px) rotate(6.7deg) scale(0.871); }
+    56.2% { transform: translate(106px, -22px) rotate(4.4deg) scale(0.906); }
+    62.5% { transform: translate(72px, -13px) rotate(2.7deg) scale(0.935); }
+    68.8% { transform: translate(46px, -8px) rotate(1.6deg) scale(0.958); }
+    75%   { transform: translate(26px, -4px) rotate(0.8deg) scale(1.002); }
+    81.2% { transform: translate(13px, -2px) rotate(0.4deg) scale(1.032); }
+    87.5% { transform: translate(5px, -1px) rotate(0.1deg) scale(1.032); }
+    93.8% { transform: translate(1px, 0px) rotate(0.0deg) scale(1.006); }
+    100%  { opacity: 1; transform: none; }
+  }
+
+  /* 2 — a shooting star climbing in from the lower right. */
+  .intro__actions > *:nth-child(2) {
+    --trail: #bfe4ff;
+    --fly-name: flyStar;
+    --fly-dur: 1400ms;
+    --fly-delay: 2150ms;
+  }
+
+  @keyframes flyStar {
+    0%    { opacity: 0; transform: translate(900px, 260px) rotate(-3.8deg) scale(0.320); }
+    6.2%  { opacity: 1; transform: translate(768px, 235px) rotate(-6.9deg) scale(0.418); }
+    12.5% { transform: translate(645px, 200px) rotate(-8.6deg) scale(0.506); }
+    18.8% { transform: translate(533px, 163px) rotate(-9.5deg) scale(0.587); }
+    25%   { transform: translate(433px, 127px) rotate(-9.9deg) scale(0.659); }
+    31.2% { transform: translate(345px, 96px) rotate(-9.8deg) scale(0.723); }
+    37.5% { transform: translate(269px, 70px) rotate(-9.3deg) scale(0.780); }
+    43.8% { transform: translate(205px, 49px) rotate(-8.7deg) scale(0.829); }
+    50%   { transform: translate(152px, 33px) rotate(-6.8deg) scale(0.871); }
+    56.2% { transform: translate(108px, 21px) rotate(-4.4deg) scale(0.906); }
+    62.5% { transform: translate(74px, 13px) rotate(-2.7deg) scale(0.935); }
+    68.8% { transform: translate(47px, 8px) rotate(-1.5deg) scale(0.958); }
+    75%   { transform: translate(27px, 4px) rotate(-0.8deg) scale(1.002); }
+    81.2% { transform: translate(14px, 2px) rotate(-0.3deg) scale(1.032); }
+    87.5% { transform: translate(5px, 1px) rotate(-0.1deg) scale(1.032); }
+    93.8% { transform: translate(1px, 0px) rotate(-0.0deg) scale(1.006); }
+    100%  { opacity: 1; transform: none; }
+  }
+
+  /* 3 — the long one: weaves down, back up, then settles. */
+  .intro__actions > *:nth-child(3) {
+    --trail: var(--skills);
+    --fly-name: flyWeave;
+    --fly-dur: 1650ms;
+    --fly-delay: 2400ms;
+  }
+
+  @keyframes flyWeave {
+    0%    { opacity: 0; transform: translate(980px, -70px) rotate(14.0deg) scale(0.320); }
+    6.2%  { opacity: 1; transform: translate(801px, 44px) rotate(11.3deg) scale(0.418); }
+    12.5% { transform: translate(642px, 84px) rotate(2.7deg) scale(0.506); }
+    18.8% { transform: translate(505px, 81px) rotate(-3.5deg) scale(0.587); }
+    25%   { transform: translate(390px, 59px) rotate(-7.0deg) scale(0.659); }
+    31.2% { transform: translate(295px, 32px) rotate(-8.6deg) scale(0.723); }
+    37.5% { transform: translate(219px, 8px) rotate(-8.6deg) scale(0.780); }
+    43.8% { transform: translate(158px, -9px) rotate(-7.1deg) scale(0.829); }
+    50%   { transform: translate(112px, -19px) rotate(-3.8deg) scale(0.871); }
+    56.2% { transform: translate(76px, -22px) rotate(-0.3deg) scale(0.906); }
+    62.5% { transform: translate(50px, -21px) rotate(1.8deg) scale(0.935); }
+    68.8% { transform: translate(30px, -16px) rotate(2.5deg) scale(0.958); }
+    75%   { transform: translate(17px, -11px) rotate(2.1deg) scale(1.002); }
+    81.2% { transform: translate(8px, -6px) rotate(1.1deg) scale(1.032); }
+    87.5% { transform: translate(3px, -2px) rotate(0.4deg) scale(1.032); }
+    93.8% { transform: translate(1px, 0px) rotate(0.1deg) scale(1.006); }
+    100%  { opacity: 1; transform: none; }
   }
 
   /* --- Scrim -------------------------------------------------------------- */

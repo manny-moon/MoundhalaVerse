@@ -142,15 +142,20 @@ export function asset(path: string): string {
 }
 
 /**
- * Headline phrases. Trimmed from the original 120-entry list to a set that
- * actually earns its place — identity lines interleaved with facts.
+ * Headline phrases.
+ *
+ * The first two are a fixed greeting; the rest are shuffled on every load and
+ * the greeting is dropped from later passes. See ORDERED_PREFIX in app.ts.
  */
 export const phrases = [
-  // Keep an identity line first — this is what renders statically under
+  // The first two always play in order, as a greeting. Everything after them
+  // is shuffled. The opening line is also what renders statically under
   // prefers-reduced-motion, where nothing ever types out.
-  'The Moundhalaverse',
+  'Welcome to the Moundhalaverse',
+  'Enjoy your stay',
 
   // Identity
+  'The Moundhalaverse',
   'Software engineer in progress',
   'From Burkina Faso to Pennsylvania',
   'Built with light and stubbornness',
