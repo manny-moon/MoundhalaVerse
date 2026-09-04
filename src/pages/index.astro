@@ -47,7 +47,7 @@ const nameWords = profile.name.split(' ').map((word) => {
         `--ry: ${scatter(index, 5).toFixed(2)}`,
         // Mostly left-to-right so it still reads as a sweep, jittered so the
         // arrivals do not land on a metronome.
-        `--in-delay: ${Math.round(index * 44 + scatter(index, 6) * 90)}ms`,
+        `--in-delay: ${Math.round(index * 38 + scatter(index, 6) * 70)}ms`,
       ].join('; '),
     };
   });
@@ -316,57 +316,81 @@ const nameLength = charIndex;
      coexist instead of the second clobbering the first. */
   body[data-stage='ready'] .intro__char {
     animation:
-      charIn 1150ms linear var(--in-delay) both,
-      charFlare 640ms ease-out calc(2050ms + var(--i) * 38ms) both;
+      charIn 2400ms linear var(--in-delay) both,
+      charFlare 780ms ease-out calc(3250ms + var(--i) * 46ms) both;
   }
 
-  /* Depth carries the entrance: each glyph starts 1400px back, which
-     perspective renders at roughly 34% scale, and rushes forward onto its
-     line. The lateral offset and spin unwind on the way in.
+  /* Three acts, and depth carries all of them.
 
-     `linear` with the easing carried by the keyframe spacing. Roughly half the
-     approach is spent in the first fifth of the timeline, so it arrives fast
-     and settles slowly. An eased timing function is applied between *every*
-     pair of keyframes, which at this density would stall eight times over. */
+     The glyph fades in about 1600px back, where perspective renders it at
+     roughly a third scale, and drifts there while it tumbles. Then it is
+     pulled in, spin unwinding as it comes, overshoots a little past its line
+     toward the reader, and settles.
+
+     `linear`, with the easing carried by the keyframe spacing: an eased timing
+     function is applied between *every* pair of keyframes, which at fourteen
+     waypoints would stall thirteen times over. */
   @keyframes charIn {
+    /* Act one: adrift, far off, still turning away. */
     0% {
       opacity: 0;
-      transform: translate3d(var(--dx), var(--dy), -1400px)
+      transform: translate3d(var(--dx), var(--dy), -1600px)
         rotate3d(var(--rx), var(--ry), 1, var(--spin));
     }
-    10% {
-      transform: translate3d(calc(var(--dx) * 0.69), calc(var(--dy) * 0.69), -966px)
-        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.69));
-    }
-    /* Visible well before it arrives, so the approach itself is the show. */
-    18% {
+    /* Visible long before it arrives, so the approach is the show. */
+    8% {
       opacity: 1;
     }
-    20% {
-      transform: translate3d(calc(var(--dx) * 0.458), calc(var(--dy) * 0.458), -641px)
-        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.458));
+    10% {
+      transform: translate3d(calc(var(--dx) * 0.975), calc(var(--dy) * 0.975), -1555px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 1.06));
     }
-    32% {
-      transform: translate3d(calc(var(--dx) * 0.258), calc(var(--dy) * 0.258), -361px)
-        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.258));
+    20% {
+      transform: translate3d(calc(var(--dx) * 0.94), calc(var(--dy) * 0.94), -1495px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 1.12));
+    }
+    30% {
+      transform: translate3d(calc(var(--dx) * 0.89), calc(var(--dy) * 0.89), -1415px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 1.18));
+    }
+    /* Act two: caught, and reeled in. */
+    38% {
+      transform: translate3d(calc(var(--dx) * 0.7), calc(var(--dy) * 0.7), -1120px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.95));
     }
     46% {
-      transform: translate3d(calc(var(--dx) * 0.116), calc(var(--dy) * 0.116), -150px)
-        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.116));
+      transform: translate3d(calc(var(--dx) * 0.52), calc(var(--dy) * 0.52), -820px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.72));
     }
-    /* A shallow overshoot past the plane, so the glyph lands rather than
-       simply stopping. */
-    58% {
-      transform: translate3d(calc(var(--dx) * 0.048), calc(var(--dy) * 0.048), 38px)
-        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.048));
+    54% {
+      transform: translate3d(calc(var(--dx) * 0.36), calc(var(--dy) * 0.36), -545px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.5));
     }
-    72% {
-      transform: translate3d(calc(var(--dx) * 0.016), calc(var(--dy) * 0.016), 16px)
-        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.016));
+    62% {
+      transform: translate3d(calc(var(--dx) * 0.23), calc(var(--dy) * 0.23), -330px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.32));
     }
-    86% {
-      transform: translate3d(calc(var(--dx) * 0.004), calc(var(--dy) * 0.004), -4px)
-        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.004));
+    70% {
+      transform: translate3d(calc(var(--dx) * 0.13), calc(var(--dy) * 0.13), -175px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.18));
+    }
+    78% {
+      transform: translate3d(calc(var(--dx) * 0.06), calc(var(--dy) * 0.06), -68px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.08));
+    }
+    /* Act three: past the line, then damped back onto it. Landing rather
+       than simply stopping. */
+    84% {
+      transform: translate3d(calc(var(--dx) * 0.022), calc(var(--dy) * 0.022), 44px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * 0.02));
+    }
+    90% {
+      transform: translate3d(calc(var(--dx) * 0.008), calc(var(--dy) * 0.008), 20px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * -0.02));
+    }
+    95% {
+      transform: translate3d(calc(var(--dx) * 0.002), calc(var(--dy) * 0.002), -6px)
+        rotate3d(var(--rx), var(--ry), 1, calc(var(--spin) * -0.008));
     }
     100% {
       opacity: 1;
@@ -374,21 +398,27 @@ const nameLength = charIndex;
     }
   }
 
-  /* A wave of light running left to right once the name is whole. Starts from
-     and returns to the glyph's own place on the warm-to-cool ramp, so the
-     resting name is untouched. Transparent rather than `none` at the ends,
-     which gives the shadow something to interpolate against. */
+  /* A wave of light crossing the finished name. `scale` is the standalone
+     property rather than a transform function, so it composes with whatever
+     charIn left behind instead of overwriting it.
+
+     Starts from and returns to the glyph's own place on the warm-to-cool ramp,
+     so the resting name is exactly what it was. Transparent rather than `none`
+     at both ends, which gives the shadow something to interpolate against. */
   @keyframes charFlare {
     0%,
     100% {
       color: color-mix(in oklab, #fff5e2, #9fc8ff calc(var(--t) * 88%));
       text-shadow: 0 0 0 rgb(159 200 255 / 0);
+      scale: 1;
     }
-    40% {
+    36% {
       color: #ffffff;
       text-shadow:
-        0 0 16px rgb(190 220 255 / 0.9),
-        0 0 42px rgb(120 170 255 / 0.5);
+        0 0 18px rgb(205 228 255 / 0.95),
+        0 0 46px rgb(120 170 255 / 0.6),
+        0 0 90px rgb(90 140 255 / 0.3);
+      scale: 1.075;
     }
   }
 
@@ -465,8 +495,8 @@ const nameLength = charIndex;
   }
 
   body[data-stage='ready'] .intro__eyebrow  { animation-delay: 120ms; }
-  body[data-stage='ready'] .intro__headline { animation-delay: 1450ms; }
-  body[data-stage='ready'] .intro__blurb    { animation-delay: 1700ms; }
+  body[data-stage='ready'] .intro__headline { animation-delay: 2200ms; }
+  body[data-stage='ready'] .intro__blurb    { animation-delay: 2500ms; }
 
   /* --- The three calls to action fly in ----------------------------------- */
 
