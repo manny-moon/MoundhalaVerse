@@ -41,7 +41,9 @@
   --font-mono: 'Space Mono', ui-monospace, 'SFMono-Regular', 'Cascadia Code', monospace;
 
   /* A fluid type scale; no media queries needed for text sizing */
-  --text-xs: clamp(0.72rem, 0.69rem + 0.14vw, 0.79rem);
+  /* Floors at 12px. Below that is uncomfortable on a phone, and it was
+     landing at 11.5px for the eyebrow, rail labels, pills and dates. */
+  --text-xs: clamp(0.75rem, 0.71rem + 0.16vw, 0.79rem);
   --text-sm: clamp(0.82rem, 0.78rem + 0.18vw, 0.92rem);
   --text-base: clamp(0.94rem, 0.89rem + 0.24vw, 1.06rem);
   --text-lg: clamp(1.08rem, 1rem + 0.36vw, 1.28rem);

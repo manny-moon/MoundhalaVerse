@@ -744,12 +744,49 @@ const nameLength = charIndex;
 
     .hud {
       align-items: flex-start;
-      padding-top: calc(env(safe-area-inset-top) + 4.5rem);
-      padding-bottom: 9rem;
+      padding-top: calc(env(safe-area-inset-top) + 3.25rem);
+      /* Clears the rail rather than running under it: the rail's own height
+         plus the inset it floats on. */
+      padding-bottom: calc(env(safe-area-inset-bottom) + 7.5rem);
     }
 
     .intro {
       max-width: none;
+      gap: var(--sp-3);
+    }
+
+    /* The settings button floats over the top-right corner, and the eyebrow is
+       the one line that reaches it. Wraps early rather than running under. */
+    .intro__eyebrow {
+      padding-right: 2.75rem;
+    }
+  }
+
+  /* Short viewports: small handsets and any phone turned sideways. The full
+     hero is taller than the space between the status bar and the rail, and it
+     was overlapping the rail and adding 46-85px of scroll to a page that is
+     meant to sit still. Everything tightens, and the blurb gives way - it is
+     the one piece repeated verbatim in the About panel. */
+  @media (max-height: 40rem) {
+    .hud {
+      padding-top: calc(env(safe-area-inset-top) + 2rem);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 6.25rem);
+    }
+
+    .intro {
+      gap: var(--sp-2);
+    }
+
+    .intro__name {
+      font-size: var(--text-2xl);
+    }
+
+    .intro__blurb {
+      display: none;
+    }
+
+    .intro__headline {
+      min-height: 1.5em;
     }
   }
 </style>

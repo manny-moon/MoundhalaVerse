@@ -135,7 +135,15 @@ export class CameraRig {
    * is stable no matter where the camera happens to be.
    */
   updateFraming(aspect: number, width = 1, height = 1): void {
-    const systemRadius = 30;
+    const portrait = aspect < 1.05;
+
+    // Fitting the whole system across a phone's short axis pushes the camera
+    // back more than twice as far as on a desktop, because the horizontal
+    // field of view is the narrow one there. The scene ended up a speck in the
+    // lower third. On portrait the outermost orbit is allowed to cross the
+    // edges instead, which frames the star and the inner planets at a size
+    // worth looking at. The rail, not the planets, is the nav on a phone.
+    const systemRadius = portrait ? 23 : 30;
     const vFov = THREE.MathUtils.degToRad(this.baseFov);
     const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect);
     const fitDistance = systemRadius / Math.tan(Math.min(vFov, hFov) / 2);
@@ -145,7 +153,6 @@ export class CameraRig {
     this.camera.aspect = aspect;
 
     // Negative offsets move the subject right / down.
-    const portrait = aspect < 1.05;
     const offsetX = portrait ? 0 : -width * 0.17;
     const offsetY = portrait ? -height * 0.16 : 0;
 

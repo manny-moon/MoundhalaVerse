@@ -192,6 +192,23 @@ ul, ol { padding: 0; list-style: none; }
               transform var(--dur) var(--ease);
 }
 
+/* Touch targets. A finger needs about 44px; the desktop sizing lands the
+   buttons at 39px tall and leaves the skip link at 40px, which is fine for a
+   cursor and awkward for a thumb. Widened only where the pointer is coarse,
+   so the mouse layout keeps its tighter proportions. */
+@media (pointer: coarse) {
+  .btn {
+    min-height: 2.75rem;
+    padding-inline: 1.25em;
+  }
+
+  .skip-link {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
 .btn:hover {
   background: color-mix(in srgb, var(--accent) 16%, transparent);
   border-color: var(--accent);

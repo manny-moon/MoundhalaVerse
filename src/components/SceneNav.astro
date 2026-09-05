@@ -131,6 +131,14 @@ const ICONS: Record<string, string> = {
     box-shadow: 0 0 10px var(--accent);
   }
 
+  /* Touch height regardless of width: a phone held sideways is wider than the
+     46rem breakpoint below, and the rail was staying 40px tall there. */
+  @media (pointer: coarse) {
+    .rail__item {
+      min-height: 2.75rem;
+    }
+  }
+
   @media (max-width: 46rem) {
     .rail {
       width: min(100vw - 1.5rem, 34rem);
@@ -139,13 +147,19 @@ const ICONS: Record<string, string> = {
     .rail ul {
       justify-content: space-between;
       border-radius: var(--radius-lg);
+      gap: 0;
     }
 
     .rail__item {
       flex-direction: column;
       gap: 0.2rem;
       flex: 1;
-      padding: 0.5rem 0.25rem;
+      /* A thumb needs about 44px in both directions. These were landing at
+         42x55, and 25x33 once the labels dropped out below 22rem. */
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      justify-content: center;
+      padding: 0.45rem 0.15rem;
       font-size: var(--text-xs);
     }
 
@@ -154,9 +168,14 @@ const ICONS: Record<string, string> = {
     }
   }
 
+  /* Labels go rather than shrink, but the icon keeps the full target. */
   @media (max-width: 22rem) {
     .rail__label {
       display: none;
+    }
+
+    .rail__item {
+      padding-block: 0.7rem;
     }
   }
 </style>

@@ -175,6 +175,21 @@ import Icon from './Icon.astro';
     cursor: pointer;
   }
 
+  /* The track is 3px and the control was 20px tall, which is a hard thing to
+     grab with a thumb. The visible design is unchanged; only the hit area
+     grows, absorbed by negative margin so the panel spacing stays put. */
+  @media (pointer: coarse) {
+    input[type='range'] {
+      height: 2.75rem;
+      margin-block: -0.75rem;
+    }
+
+    .settings__toggle {
+      width: 2.9rem;
+      height: 2.9rem;
+    }
+  }
+
   input[type='range']::-webkit-slider-runnable-track {
     height: 3px;
     border-radius: var(--radius-full);
@@ -239,6 +254,35 @@ import Icon from './Icon.astro';
   .switch:checked::after {
     translate: 1.1rem 0;
     background: var(--ink);
+  }
+
+  /* Placed after the base switch rules deliberately: same specificity, so it
+     only wins by coming later. */
+  @media (pointer: coarse) {
+    .switch {
+      width: 3.25rem;
+      height: 1.9rem;
+    }
+
+    .switch::after {
+      top: 0.3rem;
+      left: 0.3rem;
+      width: 1.3rem;
+      height: 1.3rem;
+    }
+
+    .switch:checked::after {
+      translate: 1.3rem 0;
+    }
+
+    /* A switch is meant to read wide and short, so the hit area grows past the
+       visual box rather than the box being stretched to 44px and looking
+       wrong. The knob already lives on ::after. */
+    .switch::before {
+      content: '';
+      position: absolute;
+      inset: -0.45rem -0.3rem;
+    }
   }
 
   .keys {
