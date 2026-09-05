@@ -731,7 +731,7 @@ const nameLength = charIndex;
     opacity: 1;
   }
 
-  @media (max-width: 46rem) {
+  @media (max-width: 46rem) and (orientation: portrait) {
     .hud::before {
       background: linear-gradient(
         to bottom,
@@ -759,6 +759,66 @@ const nameLength = charIndex;
        the one line that reaches it. Wraps early rather than running under. */
     .intro__eyebrow {
       padding-right: 2.75rem;
+    }
+  }
+
+  /* Short and wide: a phone held sideways.
+     Width is the plentiful axis here and height is the scarce one, so the copy
+     stays in a column on the left and the scene keeps the rest. Small
+     landscapes are under the 46rem breakpoint above and were being handed the
+     portrait layout, where the copy ran the full width and left the solar
+     system nowhere to go. */
+  @media (orientation: landscape) and (max-height: 30rem) {
+    .hud {
+      align-items: center;
+      padding-top: max(var(--sp-3), env(safe-area-inset-top));
+      padding-bottom: max(var(--sp-3), env(safe-area-inset-bottom));
+      padding-inline: max(var(--sp-5), env(safe-area-inset-left))
+        max(var(--sp-5), env(safe-area-inset-right));
+    }
+
+    .intro {
+      max-width: min(52%, 26rem);
+      gap: var(--sp-2);
+    }
+
+    /* The rail is horizontal and centred, so the hero only has to clear its
+       height rather than the full width of the screen. */
+    .hud {
+      padding-bottom: calc(env(safe-area-inset-bottom) + 4.25rem);
+    }
+
+    .intro__eyebrow {
+      padding-right: 0;
+    }
+  }
+
+  /* Very short landscape, around 320px tall. At half the width the three
+     buttons wrap onto three rows and the hero runs 57px past the rail, so the
+     column widens, the type steps down, and the eyebrow goes: on a screen this
+     size the name, the line that types, and the three ways in are what matter,
+     and the eyebrow repeats what the About panel says anyway. */
+  @media (orientation: landscape) and (max-height: 22rem) {
+    .intro {
+      max-width: min(64%, 23rem);
+      gap: var(--sp-1);
+    }
+
+    .intro__eyebrow {
+      display: none;
+    }
+
+    .intro__name {
+      font-size: var(--text-xl);
+    }
+
+    .intro__headline {
+      min-height: 1.4em;
+      font-size: var(--text-base);
+    }
+
+    .hud {
+      padding-bottom: calc(env(safe-area-inset-bottom) + 3.75rem);
     }
   }
 
