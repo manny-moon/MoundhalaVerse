@@ -129,10 +129,6 @@ const description = `Résumé of ${profile.name}, ${profile.title} at ${educatio
         <a class="btn btn--solid" href={asset(profile.resume)} download>
           <Icon name="download" size={15} /> Download the PDF
         </a>
-        <p class="doc__note">
-          The PDF is the one-page version, the one worth handing over. This page carries the
-          same history with more room to explain it.
-        </p>
       </footer>
     </main>
   </div>
@@ -323,12 +319,6 @@ const description = `Résumé of ${profile.name}, ${profile.title} at ${educatio
     margin-top: var(--sp-7);
     padding-top: var(--sp-5);
     border-top: 1px solid var(--glass-line);
-  }
-
-  .doc__note {
-    flex: 1 1 18rem;
-    font-size: var(--text-xs);
-    color: var(--ink-faint);
   }
 
   @media (max-width: 40rem) {
