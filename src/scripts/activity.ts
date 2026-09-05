@@ -5,14 +5,28 @@
  * sitting fully visible behind another one is still "visible" by that measure,
  * so anything driven off visibility alone keeps rendering the scene and typing
  * the headline at readers who are somewhere else entirely. Focus closes that
- * gap, and the two together are what "active" means here.
+ * gap on a desktop.
+ *
+ * It is no help on a phone, though, and actively harmful there: a phone shows
+ * one page at a time, so there is no visible-but-unfocused state to detect,
+ * and mobile browsers routinely report no focus at all until the first touch.
+ * Requiring it held the whole entrance frozen until the reader tapped the
+ * screen. So focus is consulted only where windows can actually overlap.
  */
 
 export type ActivityListener = (active: boolean) => void;
 
-/** Visible and focused. Both, because either alone lets a case through. */
+/** Live, so plugging in a mouse is picked up rather than fixed at load. */
+const pointingDevice =
+  typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+    ? window.matchMedia('(hover: hover) and (pointer: fine)')
+    : null;
+
+/** Visible, and focused too on anything driving a real cursor. */
 export function isActive(): boolean {
-  return document.visibilityState === 'visible' && document.hasFocus();
+  if (document.visibilityState !== 'visible') return false;
+  if (!pointingDevice?.matches) return true;
+  return document.hasFocus();
 }
 
 const listeners = new Set<ActivityListener>();
