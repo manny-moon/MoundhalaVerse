@@ -761,17 +761,15 @@ const nameLength = charIndex;
       padding-right: 2.75rem;
     }
 
-    /* Three buttons do not fit on one row at this width, and left to wrap they
-       go two-then-one, which reads as an accident. Laid out deliberately
-       instead: the primary takes the full row, the other two share the next.
-       Same height as the wrap it replaces. */
-    .intro__actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-    }
+    /* The rail is the navigation on a phone, and all three of these duplicate
+       something already reachable: Projects is a rail section, and the résumé
+       and GitHub both sit inside About and Contact. Dropping them gives the
+       hero back the vertical room it was short of.
 
-    .intro__actions > :first-child {
-      grid-column: 1 / -1;
+       `display: none` rather than hiding, so they leave the tab order and the
+       accessibility tree along with the layout. */
+    .intro__actions {
+      display: none;
     }
   }
 
@@ -805,17 +803,15 @@ const nameLength = charIndex;
       padding-right: 0;
     }
 
-    /* Three buttons do not fit on one row at this width, and left to wrap they
-       go two-then-one, which reads as an accident. Laid out deliberately
-       instead: the primary takes the full row, the other two share the next.
-       Same height as the wrap it replaces. */
-    .intro__actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-    }
+    /* The rail is the navigation on a phone, and all three of these duplicate
+       something already reachable: Projects is a rail section, and the résumé
+       and GitHub both sit inside About and Contact. Dropping them gives the
+       hero back the vertical room it was short of.
 
-    .intro__actions > :first-child {
-      grid-column: 1 / -1;
+       `display: none` rather than hiding, so they leave the tab order and the
+       accessibility tree along with the layout. */
+    .intro__actions {
+      display: none;
     }
   }
 
@@ -848,12 +844,17 @@ const nameLength = charIndex;
     }
   }
 
-  /* Short viewports: small handsets and any phone turned sideways. The full
-     hero is taller than the space between the status bar and the rail, and it
-     was overlapping the rail and adding 46-85px of scroll to a page that is
-     meant to sit still. Everything tightens, and the blurb gives way - it is
-     the one piece repeated verbatim in the About panel. */
-  @media (max-height: 40rem) {
+  /* Short viewports, which now means a phone turned sideways. The hero was
+     taller than the space between the status bar and the rail, overlapping it
+     and adding 46-85px of scroll to a page meant to sit still, so everything
+     tightens and the blurb gives way; it is the one piece repeated verbatim in
+     the About panel.
+
+     Portrait is no longer included. This was written while the three buttons
+     still took a hundred-odd pixels of the hero, and with those gone a 320x568
+     screen has around 300px to spare, so there is nothing left to fix there
+     and no reason to withhold the blurb. */
+  @media (max-height: 40rem) and (orientation: landscape) {
     .hud {
       padding-top: calc(env(safe-area-inset-top) + 2rem);
       padding-bottom: calc(env(safe-area-inset-bottom) + 6.25rem);
