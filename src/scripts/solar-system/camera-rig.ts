@@ -95,13 +95,8 @@ const AERIAL_APPROACHES: readonly Approach[] = [
   },
 ];
 
-/**
- * TESTING: only the new set is in the pool, so every selection lands on one of
- * them. Restore the full catalogue with:
- *
- *     const APPROACHES = [...CLASSIC_APPROACHES, ...AERIAL_APPROACHES];
- */
-const APPROACHES: readonly Approach[] = AERIAL_APPROACHES;
+/** Nine in the pool. One is picked at random per selection, never twice running. */
+const APPROACHES: readonly Approach[] = [...CLASSIC_APPROACHES, ...AERIAL_APPROACHES];
 
 
 /** Scratch vectors for the helix frame; reused so the loop allocates nothing. */
