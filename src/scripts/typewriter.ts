@@ -95,8 +95,8 @@ export class Typewriter {
   }
 
   private onActivity = (active: boolean): void => {
-    // Nobody is reading a window they are not looking at; the loop re-checks
-    // on the way back in.
+    // Nothing to type at a page nobody can see; the loop re-checks on the way
+    // back in.
     if (!active) {
       window.clearTimeout(this.timer);
       return;

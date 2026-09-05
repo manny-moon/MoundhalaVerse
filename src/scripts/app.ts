@@ -23,8 +23,8 @@ export function boot(config: BootConfig): void {
   // --- Idle -----------------------------------------------------------------
   //
   // One flag drives every CSS animation on the page, so the entrance, the
-  // orbiting rail dot and the caret all hold together while the reader is in
-  // another window. The scene loop and the typewriter watch the same signal
+  // orbiting rail dot and the caret all hold together while the page is off
+  // screen. The scene loop and the typewriter watch the same signal
   // themselves; this only covers what CSS owns.
   const markActivity = (active: boolean): void => {
     if (active) delete document.body.dataset.active;

@@ -39,8 +39,8 @@ html {
   }
 }
 
-/* Held while the page is not being read: another window has focus, or the tab
-   is in the background. `animation-play-state` freezes the timeline in place
+/* Held while the page is off screen: another tab is in front, or the window is
+   minimised. `animation-play-state` freezes the timeline in place
    rather than resetting it, so an entrance interrupted halfway resumes from
    exactly where it stopped instead of restarting or jumping to the end.
    Set from app.ts, which owns the same signal the scene and typewriter use. */

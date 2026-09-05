@@ -1,32 +1,24 @@
 /**
- * Whether the page is worth animating for.
+ * Whether the page is on screen at all.
  *
- * `document.hidden` only covers a backgrounded or minimised tab. A window
- * sitting fully visible behind another one is still "visible" by that measure,
- * so anything driven off visibility alone keeps rendering the scene and typing
- * the headline at readers who are somewhere else entirely. Focus closes that
- * gap on a desktop.
+ * Deliberately coarse: another tab is in front, or the window is minimised.
+ * That is the whole test.
  *
- * It is no help on a phone, though, and actively harmful there: a phone shows
- * one page at a time, so there is no visible-but-unfocused state to detect,
- * and mobile browsers routinely report no focus at all until the first touch.
- * Requiring it held the whole entrance frozen until the reader tapped the
- * screen. So focus is consulted only where windows can actually overlap.
+ * An earlier version also required `document.hasFocus()`, reasoning that a
+ * window sitting behind another one is not being read. That fires far too
+ * readily. Clicking the address bar blurs the page, so the scene froze and the
+ * headline stopped typing while the reader was looking straight at it. Mobile
+ * was worse: browsers there report no focus until the first touch, which held
+ * the entire entrance paused on load.
+ *
+ * Visibility is the signal that actually means nobody can see the page.
  */
 
 export type ActivityListener = (active: boolean) => void;
 
-/** Live, so plugging in a mouse is picked up rather than fixed at load. */
-const pointingDevice =
-  typeof window !== 'undefined' && typeof window.matchMedia === 'function'
-    ? window.matchMedia('(hover: hover) and (pointer: fine)')
-    : null;
-
-/** Visible, and focused too on anything driving a real cursor. */
+/** On screen. Not "focused" - see above. */
 export function isActive(): boolean {
-  if (document.visibilityState !== 'visible') return false;
-  if (!pointingDevice?.matches) return true;
-  return document.hasFocus();
+  return document.visibilityState === 'visible';
 }
 
 const listeners = new Set<ActivityListener>();
@@ -35,7 +27,6 @@ let bound = false;
 
 function publish(): void {
   const next = isActive();
-  // Focus and visibility often change together; only announce real edges.
   if (next === current) return;
   current = next;
   for (const listener of [...listeners]) listener(next);
@@ -46,9 +37,7 @@ function bind(): void {
   bound = true;
   current = isActive();
   document.addEventListener('visibilitychange', publish);
-  window.addEventListener('focus', publish);
-  window.addEventListener('blur', publish);
-  // Restoring from the back/forward cache fires neither of the above.
+  // Restoring from the back/forward cache fires no visibility change.
   window.addEventListener('pageshow', publish);
 }
 
@@ -61,7 +50,7 @@ export function onActivityChange(listener: ActivityListener): () => void {
   };
 }
 
-/** Runs `fn` once the page is active, immediately if it already is. */
+/** Runs `fn` once the page is on screen, immediately if it already is. */
 export function whenActive(fn: () => void): void {
   if (isActive()) {
     fn();

@@ -133,8 +133,8 @@ export class SolarSystem {
     if (this.reducedMotion) this.reveal = 1;
 
     this.start();
-    // A page opened without focus never enters the loop, and an empty canvas
-    // on someone's second monitor reads as broken. Paint the first frame.
+    // A page opened in a background tab never enters the loop, and an empty
+    // canvas when it is brought forward reads as broken. Paint one frame.
     if (!this.running) this.composer.render(0);
     options.onReady();
   }
@@ -175,8 +175,8 @@ export class SolarSystem {
    * Runs the scene, and remembers that it should be running.
    *
    * Kept separate from `resume` so that going idle and coming back cannot
-   * override the reader: with the motion switch off, a blur and refocus would
-   * otherwise start the scene up again on its own.
+   * override the reader: with the motion switch off, leaving the tab and
+   * coming back would otherwise start the scene up again on its own.
    */
   start(): void {
     this.wantsToRun = true;
@@ -285,9 +285,8 @@ export class SolarSystem {
     }
   }
 
-  // Visible but unfocused still meant a full-rate render loop before this.
   // Goes through resume/suspend, so it never revives a scene the reader
-  // switched off.
+  // switched off at the motion control.
   private onActivityChange = (active: boolean): void => {
     if (active) this.resume();
     else this.suspend();
