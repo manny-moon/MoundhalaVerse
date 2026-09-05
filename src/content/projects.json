@@ -27,7 +27,7 @@
     "year": 2023,
     "tagline": "An all-in-one hiking companion for planning a day on the trail.",
     "description": "A web application that pulls trail information together in one place, with a live weather feature backed by a third-party weather API and a parallax-scrolling interface built to make route planning feel less like reading a spreadsheet.",
-    "image": "/images/roots.png",
+    "image": "/images/roots.webp",
     "tags": [
       "JavaScript",
       "HTML/CSS",
