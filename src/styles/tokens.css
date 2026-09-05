@@ -32,7 +32,6 @@
 
   /* The accent a panel is currently themed with. Set per-modal. */
   --accent: var(--sun);
-  --accent-dim: color-mix(in srgb, var(--accent) 22%, transparent);
   --accent-glow: color-mix(in srgb, var(--accent) 45%, transparent);
 
   /* Type */
@@ -67,7 +66,6 @@
   --radius-full: 999px;
 
   /* Motion: every duration routes through here so reduced-motion can zero it */
-  --dur-fast: 140ms;
   --dur: 260ms;
   --dur-slow: 520ms;
   --ease: cubic-bezier(0.32, 0.72, 0, 1);
@@ -86,7 +84,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --dur-fast: 0.01ms;
     --dur: 0.01ms;
     --dur-slow: 0.01ms;
   }

@@ -5,7 +5,6 @@
 
 export const profile = {
   name: 'Emmanuel Moundhala',
-  shortName: 'Manny',
   title: 'Software Engineering Student',
   blurb:
     'Computer Software Engineering student at Messiah University. Two summers at Katapult Engineering building cloud infrastructure and client-facing tools for utility companies.',
@@ -114,8 +113,6 @@ export const sections = [
     hasRing: false,
   },
 ] as const;
-
-export type SectionId = (typeof sections)[number]['id'];
 
 const MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
