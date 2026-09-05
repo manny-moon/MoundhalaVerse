@@ -142,19 +142,25 @@ export class SolarSystem {
   // --- Public API ----------------------------------------------------------
 
   /** Flies to a section. `onArrive` fires once the camera lands. */
-  focus(id: string, onArrive?: () => void): void {
+  /**
+   * Flies to a section. `onArrive` fires once the camera lands.
+   *
+   * Returns the flight duration in seconds so the caller can size its own
+   * safety net, rather than keeping a copy of the longest approach that has to
+   * be remembered every time the catalogue changes.
+   */
+  focus(id: string, onArrive?: () => void): number {
     const planet = this.planets.find((p) => p.config.id === id);
     if (planet) {
-      this.rig.focusOn(() => planet.worldPosition, planet.config.size, onArrive);
-      return;
+      return this.rig.focusOn(() => planet.worldPosition, planet.config.size, onArrive);
     }
     // 'about' is also reachable through the star at the centre.
     if (id === 'about') {
-      this.rig.focusOn(() => new THREE.Vector3(0, 0, 0), SUN_RADIUS, onArrive);
-      return;
+      return this.rig.focusOn(() => new THREE.Vector3(0, 0, 0), SUN_RADIUS, onArrive);
     }
     // Unknown id: don't strand a caller waiting on an arrival that never comes.
     onArrive?.();
+    return 0;
   }
 
   release(): void {

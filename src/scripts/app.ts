@@ -95,11 +95,19 @@ export function boot(config: BootConfig): void {
     // arrival callback can be arbitrarily late. Never strand the panel behind
     // an animation that may not be running.
     //
-    // Must clear the longest approach in the camera rig's catalogue, or this
-    // fires mid-flight and opens the panel before the camera has landed.
-    pendingTimer = window.setTimeout(reveal, 3600);
-
-    system.focus(id, reveal);
+    // Sized from the flight that actually started. It used to be a hardcoded
+    // figure that had to be raised by hand every time a longer approach was
+    // added, and firing early opens the panel mid-flight.
+    //
+    // Double the flight, because the render loop clamps delta to 1/20s: below
+    // 20fps the camera's own clock runs slower than the wall clock, and a
+    // 4.6-second approach can take twice that in real time on a slow device.
+    // The arrival callback is the real path; this only has to never strand.
+    const flightSeconds = system.focus(id, reveal);
+    pendingTimer = window.setTimeout(
+      () => whenActive(reveal),
+      flightSeconds * 2000 + 1500
+    );
   }
 
   function cancelPending(): void {

@@ -28,12 +28,29 @@ interface Approach {
   readonly fov: number;
   /** Seconds. */
   readonly duration: number;
+  /**
+   * Complete camera rolls over the move, on top of `roll`.
+   *
+   * Whole turns are the trick that makes this safe: a rotation of exactly
+   * n * 2pi is the identity, so the camera can barrel round three times and
+   * still arrive with the horizon dead level. Fractional values would land
+   * tilted and are deliberately not used.
+   */
+  readonly spins?: number;
+  /** Complete loops of a corkscrew around the flight path. 0 stays planar. */
+  readonly helix?: number;
+  /** Radius of that corkscrew, times baseDistance. Fades to nothing at both ends. */
+  readonly helixAmp?: number;
 }
 
-/** The way back out; kept plain so the flair reads as belonging to arrivals. */
-const RETURN_SHAPE = { bow: 0.18, roll: 0, fov: 6 } as const;
+/** The parts of an approach the flight loop reads, shared by both directions. */
+type FlightShape = Pick<Approach, 'bow' | 'roll' | 'fov' | 'spins' | 'helix' | 'helixAmp'>;
 
-const APPROACHES: readonly Approach[] = [
+/** The way back out; kept plain so the flair reads as belonging to arrivals. */
+const RETURN_SHAPE: FlightShape = { bow: 0.18, roll: 0, fov: 6 };
+
+/** The original five. Planar arcs, at most a partial bank. */
+const CLASSIC_APPROACHES: readonly Approach[] = [
   // Swings up and over, settling from above.
   { name: 'arc-over',   bow:  0.22, side:  0.55, lift:  0.42, roll:  0.0,  fov:  7, duration: 1.9 },
   // Drops beneath the ecliptic and rises onto the planet from underneath.
@@ -45,6 +62,52 @@ const APPROACHES: readonly Approach[] = [
   // Steep and fast, with the hardest lens squeeze.
   { name: 'dive',       bow:  0.36, side:  0.18, lift:  0.85, roll:  0.16, fov: 11, duration: 1.8 },
 ];
+
+/** The showier set: corkscrew paths and multi-turn rolls. */
+const AERIAL_APPROACHES: readonly Approach[] = [
+  // The long one. Five and a half seconds and two unhurried rolls, with the
+  // path itself corkscrewing once around the line to the planet and the lens
+  // squeezing hard through the middle. The drama is meant to come from the
+  // length and the path, not from spinning quickly.
+  {
+    name: 'corkscrew',
+    bow: 0.30, side: 0.65, lift: 0.35, roll: 0, fov: 15, duration: 5.5,
+    spins: 2, helix: 1, helixAmp: 0.26,
+  },
+  // Swings wide past the far side, then curves back in with a single roll.
+  {
+    name: 'slingshot',
+    bow: 0.22, side: -1.25, lift: 0.18, roll: 0, fov: 12, duration: 3.8,
+    spins: -1, helix: 1, helixAmp: 0.18,
+  },
+  // Falls from high above, turning over once, and brakes hard on arrival.
+  {
+    name: 'tumble',
+    bow: 0.55, side: 0.10, lift: 0.95, roll: 0, fov: 13, duration: 3.4,
+    spins: 1, helix: 0, helixAmp: 0,
+  },
+  // Comes in low and flat under the ecliptic, spiralling up onto the planet.
+  // No roll at all here: the corkscrewing path supplies the motion.
+  {
+    name: 'spiral-up',
+    bow: -0.34, side: 0.85, lift: -0.55, roll: 0.3, fov: 10, duration: 3.8,
+    spins: 0, helix: 2, helixAmp: 0.15,
+  },
+];
+
+/**
+ * TESTING: only the new set is in the pool, so every selection lands on one of
+ * them. Restore the full catalogue with:
+ *
+ *     const APPROACHES = [...CLASSIC_APPROACHES, ...AERIAL_APPROACHES];
+ */
+const APPROACHES: readonly Approach[] = AERIAL_APPROACHES;
+
+
+/** Scratch vectors for the helix frame; reused so the loop allocates nothing. */
+const HELIX_DIR = new THREE.Vector3();
+const HELIX_SIDE = new THREE.Vector3();
+const HELIX_UP = new THREE.Vector3();
 
 /** Angular drift of the camera while idling, radians per second. */
 const IDLE_SWEEP = 0.028;
@@ -188,7 +251,8 @@ export class CameraRig {
     return APPROACHES[i]!;
   }
 
-  focusOn(getPosition: () => THREE.Vector3, planetRadius: number, onArrive?: () => void): void {
+  /** Starts a flight and returns its duration in seconds. */
+  focusOn(getPosition: () => THREE.Vector3, planetRadius: number, onArrive?: () => void): number {
     this.focusGetter = getPosition;
     this.focusDistance = Math.max(planetRadius * 4.5, 6.5);
     this.onArrive = onArrive ?? null;
@@ -203,6 +267,8 @@ export class CameraRig {
     const planet = getPosition();
     this.focusTarget(planet, this.tweenTo);
     this.lookTo.copy(planet);
+
+    return this.tweenDuration;
   }
 
   release(): void {
@@ -352,9 +418,39 @@ export class CameraRig {
         const flight = this.state === 'focusing' ? this.approach : RETURN_SHAPE;
         this.camera.position.y += bow * this.baseDistance * flight.bow;
 
+        // Corkscrew the path around the straight line between the endpoints.
+        // The amplitude rides on `bow`, so it is zero at both ends and cannot
+        // disturb where the move starts or lands.
+        const helix = flight.helix ?? 0;
+        if (helix !== 0) {
+          const amp = (flight.helixAmp ?? 0.25) * this.baseDistance * bow;
+          const phase = eased * Math.PI * 2 * helix;
+          HELIX_DIR.subVectors(this.tweenTo, this.tweenFrom);
+          if (HELIX_DIR.lengthSq() > 1e-6) {
+            HELIX_DIR.normalize();
+            // A frame perpendicular to travel. Falls back to world X when the
+            // path is near-vertical and the horizontal component vanishes.
+            HELIX_SIDE.set(-HELIX_DIR.z, 0, HELIX_DIR.x);
+            if (HELIX_SIDE.lengthSq() < 1e-6) HELIX_SIDE.set(1, 0, 0);
+            HELIX_SIDE.normalize();
+            HELIX_UP.crossVectors(HELIX_DIR, HELIX_SIDE).normalize();
+            this.camera.position.addScaledVector(HELIX_SIDE, Math.cos(phase) * amp);
+            this.camera.position.addScaledVector(HELIX_UP, Math.sin(phase) * amp);
+          }
+        }
+
         // Roll unwinds to level by the time it arrives, so the horizon is
-        // always straight once the panel is up.
-        this.roll = flight.roll * bow;
+        // always straight once the panel is up. Full turns are added on top:
+        // n * 2pi is the identity, so a two-roll arrival is still level.
+        //
+        // smoothstep, not an ease-out. An ease-out front-loads the rotation,
+        // which put the peak rate at the very start and made the move read as
+        // a whip rather than a roll. smoothstep begins and ends at a standstill
+        // and peaks at only 1.5x the average rate, in the middle where the
+        // camera is already travelling fastest.
+        const spins = flight.spins ?? 0;
+        const spinCurve = spins === 0 ? 0 : smoothstep(t);
+        this.roll = flight.roll * bow + spins * Math.PI * 2 * spinCurve;
 
         // Squeeze the field of view through the middle of the move and release
         // it on arrival. Reads as a lens settling onto a subject.
@@ -367,6 +463,9 @@ export class CameraRig {
         if (t >= 1) {
           if (this.state === 'focusing') {
             this.state = 'focused';
+            // Whole turns are visually level, so drop the value rather than
+            // re-applying an identity rotation on every focused frame.
+            this.roll = 0;
             // Hand off exactly once; the callback may start a new flight.
             const arrived = this.onArrive;
             this.onArrive = null;
