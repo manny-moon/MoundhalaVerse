@@ -162,26 +162,49 @@ export function boot(config: BootConfig): void {
   const settingsPanel = $('#settings-panel');
 
   if (settingsToggle && settingsPanel) {
+    // `aria-expanded` is the source of truth rather than `hidden`, because
+    // `hidden` now lags the close by the length of the fade.
+    const isSettingsOpen = (): boolean =>
+      settingsToggle.getAttribute('aria-expanded') === 'true';
+
     const setOpen = (open: boolean): void => {
-      settingsPanel.classList.toggle('is-open', open);
-      settingsPanel.hidden = !open;
       settingsToggle.setAttribute('aria-expanded', String(open));
+
+      if (open) {
+        settingsPanel.hidden = false;
+        // The panel has to be laid out for a frame before the class that
+        // transitions it in, or there is no starting state to animate from.
+        requestAnimationFrame(() => {
+          if (isSettingsOpen()) settingsPanel.classList.add('is-open');
+        });
+        return;
+      }
+
+      settingsPanel.classList.remove('is-open');
+      // Leave it displayed until the fade finishes, then take it out of the
+      // layout so it stops intercepting clicks.
+      const done = (): void => {
+        if (!isSettingsOpen()) settingsPanel.hidden = true;
+      };
+      settingsPanel.addEventListener('transitionend', done, { once: true });
+      // transitionend never fires under reduced motion, where the duration is
+      // effectively zero, so back it with a timer.
+      window.setTimeout(done, 400);
     };
 
     settingsToggle.addEventListener('click', () => {
-      const isOpen = settingsToggle.getAttribute('aria-expanded') === 'true';
-      setOpen(!isOpen);
+      setOpen(!isSettingsOpen());
     });
 
     document.addEventListener('click', (event) => {
       const target = event.target as Node;
-      if (settingsPanel.hidden) return;
+      if (!isSettingsOpen()) return;
       if (settingsPanel.contains(target) || settingsToggle.contains(target)) return;
       setOpen(false);
     });
 
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !settingsPanel.hidden && !modals.current) {
+      if (event.key === 'Escape' && isSettingsOpen() && !modals.current) {
         setOpen(false);
         settingsToggle.focus();
       }

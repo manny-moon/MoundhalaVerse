@@ -17,6 +17,15 @@ html {
   scroll-behavior: smooth;
 }
 
+/* `hidden` has to actually hide.
+   The user-agent rule is `[hidden] { display: none }`, and any author
+   `display` declaration outranks it. A panel setting `display: grid` on
+   itself stayed laid out while hidden: invisible at opacity 0, and still
+   swallowing every click inside its box. */
+[hidden] {
+  display: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
