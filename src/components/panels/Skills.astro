@@ -12,7 +12,6 @@ const ordered = groups.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id))
 <Panel
   id="skills"
   title="Skills"
-  subtitle="What I reach for, and what I'm still learning"
   accent="#96CEB4"
   icon="wrench"
 >
@@ -39,9 +38,6 @@ const ordered = groups.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id))
     }
   </div>
 
-  <p class="footnote">
-    Listed because I've shipped something with it, not because I've read about it.
-  </p>
 </Panel>
 
 <style>
@@ -100,14 +96,6 @@ const ordered = groups.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id))
   .skill__note {
     margin-left: auto;
     font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    color: var(--ink-faint);
-  }
-
-  .footnote {
-    margin-top: var(--sp-5);
-    padding-top: var(--sp-4);
-    border-top: 1px solid var(--glass-line);
     font-size: var(--text-xs);
     color: var(--ink-faint);
   }

@@ -7,7 +7,6 @@ export const profile = {
   name: 'Emmanuel Moundhala',
   shortName: 'Manny',
   title: 'Software Engineering Student',
-  tagline: 'GCP, APIs, and interfaces people actually enjoy using.',
   blurb:
     'Computer Software Engineering student at Messiah University. Two summers at Katapult Engineering building cloud infrastructure and client-facing tools for utility companies.',
   location: 'Mechanicsburg, PA',
