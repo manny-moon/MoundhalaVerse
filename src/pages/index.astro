@@ -760,6 +760,19 @@ const nameLength = charIndex;
     .intro__eyebrow {
       padding-right: 2.75rem;
     }
+
+    /* Three buttons do not fit on one row at this width, and left to wrap they
+       go two-then-one, which reads as an accident. Laid out deliberately
+       instead: the primary takes the full row, the other two share the next.
+       Same height as the wrap it replaces. */
+    .intro__actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .intro__actions > :first-child {
+      grid-column: 1 / -1;
+    }
   }
 
   /* Short and wide: a phone held sideways.
@@ -790,6 +803,19 @@ const nameLength = charIndex;
 
     .intro__eyebrow {
       padding-right: 0;
+    }
+
+    /* Three buttons do not fit on one row at this width, and left to wrap they
+       go two-then-one, which reads as an accident. Laid out deliberately
+       instead: the primary takes the full row, the other two share the next.
+       Same height as the wrap it replaces. */
+    .intro__actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .intro__actions > :first-child {
+      grid-column: 1 / -1;
     }
   }
 
