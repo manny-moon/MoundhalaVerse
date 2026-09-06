@@ -54,11 +54,11 @@ const CLASSIC_APPROACHES: readonly Approach[] = [
   // Swings up and over, settling from above.
   { name: 'arc-over',   bow:  0.22, side:  0.55, lift:  0.42, roll:  0.0,  fov:  7, duration: 1.9 },
   // Drops beneath the ecliptic and rises onto the planet from underneath.
-  { name: 'from-under', bow: -0.30, side:  0.40, lift: -0.62, roll:  0.10, fov:  6, duration: 2.0 },
+  { name: 'from-under', bow: -0.30, side:  0.40, lift: -0.52, roll:  0.10, fov:  6, duration: 2.35 },
   // Banks hard through the middle, rolling the horizon over before levelling.
   { name: 'barrel',     bow:  0.12, side:  0.80, lift:  0.30, roll:  0.55, fov:  9, duration: 2.15 },
   // Loops around to the far side and comes back in.
-  { name: 'wide-swing', bow:  0.18, side: -1.05, lift:  0.28, roll: -0.28, fov:  8, duration: 2.25 },
+  { name: 'wide-swing', bow:  0.18, side: -0.75, lift:  0.28, roll: -0.28, fov:  8, duration: 2.85 },
   // Steep and fast, with the hardest lens squeeze.
   { name: 'dive',       bow:  0.36, side:  0.18, lift:  0.85, roll:  0.16, fov: 11, duration: 1.8 },
 ];
@@ -77,8 +77,8 @@ const AERIAL_APPROACHES: readonly Approach[] = [
   // Swings wide past the far side, then curves back in with a single roll.
   {
     name: 'slingshot',
-    bow: 0.22, side: -1.25, lift: 0.18, roll: 0, fov: 12, duration: 3.8,
-    spins: -1, helix: 1, helixAmp: 0.18,
+    bow: 0.22, side: -0.95, lift: 0.18, roll: 0, fov: 12, duration: 4.3,
+    spins: -1, helix: 1, helixAmp: 0.16,
   },
   // Falls from high above, turning over once, and brakes hard on arrival.
   {
@@ -90,8 +90,8 @@ const AERIAL_APPROACHES: readonly Approach[] = [
   // No roll at all here: the corkscrewing path supplies the motion.
   {
     name: 'spiral-up',
-    bow: -0.34, side: 0.85, lift: -0.55, roll: 0.3, fov: 10, duration: 3.8,
-    spins: 0, helix: 2, helixAmp: 0.15,
+    bow: -0.34, side: 0.8, lift: -0.55, roll: 0.3, fov: 10, duration: 4.2,
+    spins: 0, helix: 1.5, helixAmp: 0.13,
   },
 ];
 
@@ -422,7 +422,12 @@ export class CameraRig {
         const helix = flight.helix ?? 0;
         if (helix !== 0) {
           const amp = (flight.helixAmp ?? 0.25) * this.baseDistance * bow;
-          const phase = eased * Math.PI * 2 * helix;
+          // Phase runs on raw `t`, not the eased progress. Easing it made the
+          // corkscrew spin fastest at exactly the moment the camera was already
+          // travelling fastest, and the two compounded into a whip through the
+          // middle of the move. At a constant rate the loops read the same and
+          // the peak comes down sharply.
+          const phase = t * Math.PI * 2 * helix;
           HELIX_DIR.subVectors(this.tweenTo, this.tweenFrom);
           if (HELIX_DIR.lengthSq() > 1e-6) {
             HELIX_DIR.normalize();
