@@ -1,4 +1,5 @@
 import { isActive, onActivityChange, whenActive } from './activity';
+import { SceneAudio } from './audio';
 import { ModalController } from './modals';
 import { Typewriter } from './typewriter';
 import { supportsWebGL, prefersReducedMotion } from './solar-system/quality';
@@ -21,6 +22,7 @@ export function boot(config: BootConfig): void {
   let system: SolarSystem | null = null;
   /** Set before the scene exists; applied as soon as it does. */
   let pendingCalmCamera = false;
+  const audio = new SceneAudio();
 
   // --- Idle -----------------------------------------------------------------
   //
@@ -64,6 +66,7 @@ export function boot(config: BootConfig): void {
       if (!sequencing) system?.focus(id);
     },
     onClose: () => {
+      audio.close();
       pendingToken += 1; // strand any in-flight reveal
       window.clearTimeout(pendingTimer);
       system?.release();
@@ -110,6 +113,8 @@ export function boot(config: BootConfig): void {
     // so it lands in one step and `reveal` has already run. Arming the timer
     // then would just open the panel a second time.
     const flightSeconds = system.focus(id, reveal);
+    audio.select();
+    if (flightSeconds > 0) audio.flight(flightSeconds);
     if (flightSeconds > 0) {
       pendingTimer = window.setTimeout(
         () => whenActive(reveal),
@@ -237,6 +242,40 @@ export function boot(config: BootConfig): void {
     if (motionToggle.checked) system?.start();
     else system?.stop();
   });
+
+  // Sound is off unless asked for, and the AudioContext is not even built
+  // until then: browsers only let one run after a real interaction, and a
+  // portfolio that makes noise unprompted is a portfolio that gets closed.
+  const SOUND_KEY = 'mv:sound';
+  const soundToggle = $<HTMLInputElement>('#sound-toggle');
+  if (soundToggle) {
+    let stored: string | null = null;
+    try {
+      stored = localStorage.getItem(SOUND_KEY);
+    } catch {
+      // Storage blocked; sound simply stays off, which is the safe default.
+    }
+    soundToggle.checked = stored === '1';
+
+    soundToggle.addEventListener('change', () => {
+      // This handler *is* the gesture the browser wants.
+      if (soundToggle.checked) void audio.enable();
+      else audio.disable();
+      try {
+        localStorage.setItem(SOUND_KEY, soundToggle.checked ? '1' : '0');
+      } catch {
+        // Not remembering it is survivable; ignoring the click would not be.
+      }
+    });
+
+    // A remembered preference still cannot start audio on its own. Wait for the
+    // reader's first interaction anywhere on the page and start it then.
+    if (soundToggle.checked) {
+      const startOnGesture = (): void => void audio.enable();
+      document.addEventListener('pointerdown', startOnGesture, { once: true });
+      document.addEventListener('keydown', startOnGesture, { once: true });
+    }
+  }
 
   // Reduced camera motion is a comfort setting, so unlike the others it is
   // remembered. Having to find and re-set it on every visit would defeat the

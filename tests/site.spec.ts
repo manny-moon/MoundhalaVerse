@@ -222,3 +222,34 @@ test.describe('assets and metadata', () => {
     expect(meta.jsonLd).toBe(true);
   });
 });
+
+test.describe('sound (experimental)', () => {
+  test('no audio graph exists until it is asked for', async ({ page }) => {
+    // The point of the feature is that it costs nothing and makes no noise
+    // unless someone opts in, so this asserts the absence rather than the
+    // presence: zero AudioContexts constructed on a normal visit.
+    await page.addInitScript(() => {
+      (window as any).__contexts = 0;
+      const Real = window.AudioContext;
+      window.AudioContext = class extends Real {
+        constructor(...args: any[]) {
+          super(...args);
+          (window as any).__contexts += 1;
+        }
+      } as any;
+    });
+    await ready(page);
+    await settle(page);
+    await page.waitForTimeout(500);
+
+    expect(await page.evaluate(() => (window as any).__contexts)).toBe(0);
+    expect(await page.locator('#sound-toggle').isChecked()).toBe(false);
+
+    // Turning it on is a gesture, which is the only thing that may start audio.
+    await page.locator('#settings-toggle').click();
+    await page.waitForTimeout(300);
+    await page.locator('#sound-toggle').check();
+    await page.waitForTimeout(600);
+    expect(await page.evaluate(() => (window as any).__contexts)).toBe(1);
+  });
+});
