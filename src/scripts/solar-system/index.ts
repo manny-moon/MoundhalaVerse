@@ -193,6 +193,11 @@ export class SolarSystem {
     this.orbitSpeed = multiplier;
   }
 
+  /** Calmer flights to a planet, without stopping the scene. */
+  setReducedCameraMotion(reduced: boolean): void {
+    this.rig.setReducedCameraMotion(reduced);
+  }
+
   /**
    * Runs the scene, and remembers that it should be running.
    *

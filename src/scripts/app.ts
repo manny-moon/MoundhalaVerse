@@ -19,6 +19,8 @@ export function boot(config: BootConfig): void {
   if (!scrim) return;
 
   let system: SolarSystem | null = null;
+  /** Set before the scene exists; applied as soon as it does. */
+  let pendingCalmCamera = false;
 
   // --- Idle -----------------------------------------------------------------
   //
@@ -236,6 +238,33 @@ export function boot(config: BootConfig): void {
     else system?.stop();
   });
 
+  // Reduced camera motion is a comfort setting, so unlike the others it is
+  // remembered. Having to find and re-set it on every visit would defeat the
+  // point for the people who need it. It also starts on when the operating
+  // system already asks for reduced motion.
+  const CALM_KEY = 'mv:calm-camera';
+  const calmToggle = $<HTMLInputElement>('#calm-camera');
+  if (calmToggle) {
+    let stored: string | null = null;
+    try {
+      stored = localStorage.getItem(CALM_KEY);
+    } catch {
+      // Private browsing, or storage blocked. Fall back to the OS preference.
+    }
+    calmToggle.checked = stored === null ? prefersReducedMotion() : stored === '1';
+    pendingCalmCamera = calmToggle.checked;
+
+    calmToggle.addEventListener('change', () => {
+      pendingCalmCamera = calmToggle.checked;
+      system?.setReducedCameraMotion(calmToggle.checked);
+      try {
+        localStorage.setItem(CALM_KEY, calmToggle.checked ? '1' : '0');
+      } catch {
+        // Not being able to remember it is not a reason to ignore it now.
+      }
+    });
+  }
+
   // --- WebGL scene ----------------------------------------------------------
 
   const canvas = $<HTMLCanvasElement>('#scene');
@@ -294,6 +323,8 @@ export function boot(config: BootConfig): void {
         onReady: () => {
           stage.dataset.mode = 'ready';
           if (speedControl) applySpeed(speedControl.value);
+          // The control was read before the scene existed, so apply it now.
+          system?.setReducedCameraMotion(pendingCalmCamera);
           // Shaders are compiled by this point, so the main thread is free for
           // the entrance to run smoothly.
           markReady();

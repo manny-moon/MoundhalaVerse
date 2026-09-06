@@ -39,6 +39,14 @@ import Icon from './Icon.astro';
         <label for="motion-toggle">Animate scene</label>
         <input type="checkbox" id="motion-toggle" class="switch" checked />
       </div>
+
+      <div class="field field--row">
+        <label for="calm-camera">
+          Reduce camera motion
+          <span class="field__hint">Flies straight to a planet, no rolls</span>
+        </label>
+        <input type="checkbox" id="calm-camera" class="switch" />
+      </div>
     </section>
 
     <section class="settings__section">
@@ -159,6 +167,13 @@ import Icon from './Icon.astro';
   .field--row {
     grid-template-columns: 1fr auto;
     align-items: center;
+  }
+
+  .field__hint {
+    display: block;
+    margin-top: 0.1rem;
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
   }
 
   output {

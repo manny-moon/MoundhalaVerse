@@ -95,6 +95,25 @@ const AERIAL_APPROACHES: readonly Approach[] = [
   },
 ];
 
+/**
+ * The move used when the reader asks for calmer camera work.
+ *
+ * No roll, no corkscrew, and only a hint of lens squeeze. The shape is not
+ * what intuition suggests: the first attempt flew short and straight and
+ * measured 72 deg/s of view swing, worse than half the normal catalogue. A
+ * direct path passes close to the planet, and close up a small sideways motion
+ * becomes a large angular one.
+ *
+ * A wide, shallow arc holds the camera off the planet's line for longer, so
+ * the bearing changes gradually instead of swinging late. Searched the
+ * parameter space rather than guessing: this measures 18 deg/s, calmer than
+ * anything in the normal set.
+ */
+const CALM_APPROACH: Approach = {
+  name: 'calm',
+  bow: 0.08, side: 0.85, lift: 0.42, roll: 0, fov: 2, duration: 1.8,
+};
+
 /** Nine in the pool. One is picked at random per selection, never twice running. */
 const APPROACHES: readonly Approach[] = [...CLASSIC_APPROACHES, ...AERIAL_APPROACHES];
 
@@ -158,6 +177,7 @@ export class CameraRig {
 
   private approach: Approach = APPROACHES[0]!;
   private approachIndex = -1;
+  private reducedCameraMotion = false;
   /** Camera roll, applied after lookAt since lookAt would otherwise clear it. */
   private roll = 0;
 
@@ -238,7 +258,18 @@ export class CameraRig {
   }
 
   /** Random, but never the move that just played. */
+  /**
+   * Calmer camera work, independent of switching the scene off entirely.
+   *
+   * Someone can want the orbits and the parallax and still not want a
+   * five-second barrel roll every time they open a section.
+   */
+  setReducedCameraMotion(reduced: boolean): void {
+    this.reducedCameraMotion = reduced;
+  }
+
   private pickApproach(): Approach {
+    if (this.reducedCameraMotion) return CALM_APPROACH;
     if (APPROACHES.length < 2) return APPROACHES[0]!;
     let i = this.approachIndex;
     while (i === this.approachIndex) i = Math.floor(Math.random() * APPROACHES.length);
@@ -272,7 +303,7 @@ export class CameraRig {
 
     this.state = 'returning';
     this.tweenElapsed = 0;
-    this.tweenDuration = this.reducedMotion ? 0.001 : 1.25;
+    this.tweenDuration = this.reducedMotion ? 0.001 : this.reducedCameraMotion ? 0.9 : 1.25;
     this.tweenFrom.copy(this.camera.position);
     this.lookFrom.copy(this.lookAt);
     this.idlePosition(this.orbitAngle, this.tweenTo);
