@@ -266,8 +266,9 @@ export class CameraRig {
     return this.tweenDuration;
   }
 
-  release(): void {
-    if (this.state === 'idle' || this.state === 'intro') return;
+  /** Starts the way back out and returns its duration in seconds; 0 if already out. */
+  release(): number {
+    if (this.state === 'idle' || this.state === 'intro') return 0;
 
     this.state = 'returning';
     this.tweenElapsed = 0;
@@ -279,6 +280,8 @@ export class CameraRig {
     this.focusGetter = null;
     // Pulling out cancels any panel that was waiting on the flight.
     this.onArrive = null;
+
+    return this.tweenDuration;
   }
 
   get isFocused(): boolean {

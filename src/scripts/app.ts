@@ -103,11 +103,17 @@ export function boot(config: BootConfig): void {
     // 20fps the camera's own clock runs slower than the wall clock, and a
     // 4.6-second approach can take twice that in real time on a slow device.
     // The arrival callback is the real path; this only has to never strand.
+    // A zero duration means the move already finished inside `focus`, which is
+    // what happens with the scene switched off: there is no loop to advance it,
+    // so it lands in one step and `reveal` has already run. Arming the timer
+    // then would just open the panel a second time.
     const flightSeconds = system.focus(id, reveal);
-    pendingTimer = window.setTimeout(
-      () => whenActive(reveal),
-      flightSeconds * 2000 + 1500
-    );
+    if (flightSeconds > 0) {
+      pendingTimer = window.setTimeout(
+        () => whenActive(reveal),
+        flightSeconds * 2000 + 1500
+      );
+    }
   }
 
   function cancelPending(): void {

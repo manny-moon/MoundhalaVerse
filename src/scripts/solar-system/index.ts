@@ -152,11 +152,15 @@ export class SolarSystem {
   focus(id: string, onArrive?: () => void): number {
     const planet = this.planets.find((p) => p.config.id === id);
     if (planet) {
-      return this.rig.focusOn(() => planet.worldPosition, planet.config.size, onArrive);
+      return this.settleIfStopped(
+        this.rig.focusOn(() => planet.worldPosition, planet.config.size, onArrive)
+      );
     }
     // 'about' is also reachable through the star at the centre.
     if (id === 'about') {
-      return this.rig.focusOn(() => new THREE.Vector3(0, 0, 0), SUN_RADIUS, onArrive);
+      return this.settleIfStopped(
+        this.rig.focusOn(() => new THREE.Vector3(0, 0, 0), SUN_RADIUS, onArrive)
+      );
     }
     // Unknown id: don't strand a caller waiting on an arrival that never comes.
     onArrive?.();
@@ -164,7 +168,25 @@ export class SolarSystem {
   }
 
   release(): void {
-    this.rig.release();
+    this.settleIfStopped(this.rig.release());
+  }
+
+  /**
+   * Finishes a camera move that has no frames to run in.
+   *
+   * With the scene switched off at the motion control there is no render loop,
+   * so the tween's clock never advances, the arrival never fires, and the
+   * caller sits on its safety timer waiting out a flight that will never
+   * progress. Nothing is on screen to animate anyway, so the move is applied
+   * in one step and a single frame is drawn to show where it landed.
+   *
+   * Returns 0 in that case, which tells the caller there is nothing to wait for.
+   */
+  private settleIfStopped(seconds: number): number {
+    if (this.running || this.disposed) return seconds;
+    this.rig.update(seconds);
+    this.composer.render(0);
+    return 0;
   }
 
   setOrbitSpeed(multiplier: number): void {
