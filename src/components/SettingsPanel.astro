@@ -41,10 +41,7 @@ import Icon from './Icon.astro';
       </div>
 
       <div class="field field--row">
-        <label for="calm-camera">
-          Reduce camera motion
-          <span class="field__hint">Flies straight to a planet, no rolls</span>
-        </label>
+        <label for="calm-camera">Reduce camera motion</label>
         <input type="checkbox" id="calm-camera" class="switch" />
       </div>
     </section>
@@ -167,13 +164,6 @@ import Icon from './Icon.astro';
   .field--row {
     grid-template-columns: 1fr auto;
     align-items: center;
-  }
-
-  .field__hint {
-    display: block;
-    margin-top: 0.1rem;
-    font-size: var(--text-xs);
-    color: var(--ink-faint);
   }
 
   output {
